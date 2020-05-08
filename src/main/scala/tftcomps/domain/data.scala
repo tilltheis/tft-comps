@@ -1,4 +1,4 @@
-package tftcomps
+package tftcomps.domain
 
 object data {
   object roles {

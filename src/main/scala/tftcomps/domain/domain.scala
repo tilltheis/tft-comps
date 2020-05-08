@@ -1,4 +1,6 @@
-package object tftcomps {
+package tftcomps
+
+package object domain {
   case class Role(name: String, stackingBonusThresholds: Set[Int])
 
   case class Champion(name: String, roles: Set[Role], cost: Int)
