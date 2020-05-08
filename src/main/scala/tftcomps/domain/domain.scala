@@ -67,16 +67,21 @@ package object domain {
     def heuristic(composition: Composition): Long =
       maxTeamSize * (1 + 12) - composition.worth // change between 4 and 12
 
-    def satisfiesRequirements(composition: Composition): Boolean =
-      requiredRoles.forall(requiredRole =>
+    def satisfiesRequirements(composition: Composition): Boolean = {
+      val satisfiesRoles = requiredRoles.forall(requiredRole =>
         composition.roles.exists {
           case (`requiredRole`, count) if count >= requiredRole.stackingBonusThresholds.min => true
           case _                                                                            => false
       })
+      val satisfiesChampions = requiredChampions.forall(composition.champions.contains)
+
+      satisfiesRoles && satisfiesChampions
+    }
 
     def satisfiesRequirementsOrCompTooSmall(composition: Composition): Boolean = {
-      val allChampionsSatisfyRequiredRoles = composition.champions.forall(_.roles.exists(requiredRoles.contains))
-      allChampionsSatisfyRequiredRoles || satisfiesRequirements(composition)
+      val championsLackingRequiredRoles = composition.champions.filterNot(_.roles.exists(requiredRoles.contains))
+      satisfiesRequirements(composition) || championsLackingRequiredRoles.isEmpty || championsLackingRequiredRoles
+        .forall(requiredChampions.contains)
     }
 
     def search_(visited: PriorityQueue[Composition],
@@ -106,7 +111,7 @@ package object domain {
       }
     }
 
-    // a champion has 3 roles max
+    // champions have 3 roles max
     if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * 3) LazyList.empty
     else {
       val initialComposition = Composition(requiredChampions)

@@ -156,5 +156,20 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
 
       search(allChampions, 2, requiredRoles = Set(role1)) should ===(LazyList.empty)
     }
+
+    "find something when role and champion requirements don't overlap but can be fulifilled" in {
+      val role1 = Role("role1", Set(3))
+      val role2 = Role("role2", Set(4))
+      val role3 = Role("role3", Set(1))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role1), 1)
+      val champ3 = Champion("champ3", Set(role1), 1)
+      val champ4 = Champion("champ4", Set(role2), 1)
+      val champ5 = Champion("champ5", Set(role3), 1)
+      val allChampions = Seq(champ1, champ2, champ3, champ4, champ5)
+
+      search(allChampions, 4, requiredRoles = Set(role1), requiredChampions = Set(champ4)) should ===(
+        LazyList(Composition(Set(champ1, champ2, champ3, champ4))))
+    }
   }
 }
