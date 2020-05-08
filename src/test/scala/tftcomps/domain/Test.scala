@@ -99,10 +99,62 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      search(allChampions, 3, Set(champ1, champ2)).head should {
+      search(allChampions, 3, requiredChampions = Set(champ1, champ2)).head should {
         equal(Composition(Set(champ1, champ2, champ3))) or
           equal(Composition(Set(champ1, champ2, champ4)))
       }
+    }
+
+    "find nothing when the number of required champions is greater than the team size" in {
+      val role1 = Role("role1", Set(1))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role1), 1)
+      val champ3 = Champion("champ3", Set(role1), 1)
+      val champ4 = Champion("champ4", Set(role1), 1)
+      val allChampions = Seq(champ1, champ2, champ3, champ4)
+
+      search(allChampions, 1, requiredChampions = Set(champ1, champ2)) should ===(LazyList.empty)
+    }
+
+    "be possible around a required set of roles" in {
+      val role1 = Role("role1", Set(1))
+      val role2 = Role("role2", Set(1))
+      val role3 = Role("role3", Set(1))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role2), 1)
+      val champ3 = Champion("champ3", Set(role3), 1)
+      val champ4 = Champion("champ4", Set(role2), 1)
+      val champ5 = Champion("champ5", Set(role2), 1)
+      val champ6 = Champion("champ6", Set(role3), 1)
+      val allChampions = Seq(champ1, champ2, champ3, champ4, champ5, champ6)
+
+      search(allChampions, 3, requiredRoles = Set(role1, role2)).head.roles.keySet should contain allElementsOf (Set(
+        role1,
+        role2))
+
+      search(allChampions, 2, requiredRoles = Set(role3)).head.roles.keySet should contain allElementsOf (Set(role3))
+    }
+
+    "find nothing when the number of required roles is greater than the team size" in {
+      val role1 = Role("role1", Set(1))
+      val role2 = Role("role2", Set(1))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role1), 1)
+      val champ3 = Champion("champ3", Set(role1), 1)
+      val champ4 = Champion("champ4", Set(role1), 1)
+      val allChampions = Seq(champ1, champ2, champ3, champ4)
+
+      search(allChampions, 1, requiredRoles = Set(role1, role2)) should ===(LazyList.empty)
+    }
+
+    "find nothing when the number of required roles cannot be satisfied because the count threshold cannot be reached" in {
+      val role1 = Role("role1", Set(3))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role1), 1)
+      val champ3 = Champion("champ3", Set(role1), 1)
+      val allChampions = Seq(champ1, champ2, champ3)
+
+      search(allChampions, 2, requiredRoles = Set(role1)) should ===(LazyList.empty)
     }
   }
 }

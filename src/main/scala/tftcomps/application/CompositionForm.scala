@@ -60,8 +60,8 @@ object CompositionForm {
         props.onCompositionConfigChange(props.compositionConfig.copy(maxTeamSize = x))),
       numberSlider("Max Champion Cost", 1 to 5, props.compositionConfig.maxChampionCost)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(maxChampionCost = x))),
-      checkboxSet("Required Roles", tftcomps.domain.data.roles.all, Set.empty)(_.name)(_ =>
-        props.onCompositionConfigChange(props.compositionConfig)),
+      checkboxSet("Required Roles", tftcomps.domain.data.roles.all, props.compositionConfig.requiredRoles)(_.name)(x =>
+        props.onCompositionConfigChange(props.compositionConfig.copy(requiredRoles = x))),
       checkboxSet("Required Champions", tftcomps.domain.data.champions.all, props.compositionConfig.requiredChampions)(
         _.name)(x => props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),
     )

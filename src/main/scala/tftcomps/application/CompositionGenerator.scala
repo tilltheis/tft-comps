@@ -40,6 +40,7 @@ object CompositionGenerator {
         search(
           Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
           compositionConfig.maxTeamSize,
+          compositionConfig.requiredRoles,
           compositionConfig.requiredChampions
         ).take(1)
       }
@@ -64,10 +65,14 @@ object CompositionGenerator {
   val Component =
     ScalaComponent
       .builder[Unit]("Composition Generator")
-      .initialState(
-        State(CompositionConfig(maxTeamSize = 8, maxChampionCost = 5, requiredChampions = Set.empty),
-              compositions = LazyList.empty,
-              compositionRenderLimit = 0))
+      .initialState(State(
+        CompositionConfig(maxTeamSize = 8,
+                          maxChampionCost = 5,
+                          requiredRoles = Set.empty,
+                          requiredChampions = Set.empty),
+        compositions = LazyList.empty,
+        compositionRenderLimit = 0
+      ))
       .renderBackend[Backend]
       .componentDidMount(mounted => mounted.backend.handleCompositionConfigChange(mounted.state.compositionConfig))
       .build

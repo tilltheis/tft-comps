@@ -2,7 +2,6 @@ package tftcomps.application
 
 import japgolly.scalajs.react.ScalaFnComponent
 import japgolly.scalajs.react.vdom.html_<^._
-import tftcomps.OldMain.compositionDescription
 import tftcomps.domain.Composition
 
 object CompositionResults {
@@ -10,6 +9,16 @@ object CompositionResults {
   final case class Props(compositions: Set[Composition])
 
   val Component = ScalaFnComponent[Props] { props =>
+    def compositionDescription(composition: Composition): String = {
+      val rolesString =
+        composition.roles.toSeq
+          .sortBy { case (role, count) => (-count, role.name) }
+          .map { case (role, count) => s"$count ${role.name}" }
+          .mkString(", ")
+      val champsString = composition.champions.map(_.name).toSeq.sorted.mkString(", ")
+      s"[${composition.worth}] (${composition.roles.size}) $rolesString ($champsString)"
+    }
+
     if (props.compositions.isEmpty) <.div("No results.")
     else {
       val worths = props.compositions.map(_.worth)

@@ -60,11 +60,24 @@ package object domain {
 
   def search(championPool: Seq[Champion],
              maxTeamSize: Int,
+             requiredRoles: Set[Role] = Set.empty,
              requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] = {
     implicit val compositionOrdering: Ordering[Composition] = Ordering.by(_.worth)
 
     def heuristic(composition: Composition): Long =
       maxTeamSize * (1 + 12) - composition.worth // change between 4 and 12
+
+    def satisfiesRequirements(composition: Composition): Boolean =
+      requiredRoles.forall(requiredRole =>
+        composition.roles.exists {
+          case (`requiredRole`, count) if count >= requiredRole.stackingBonusThresholds.min => true
+          case _                                                                            => false
+      })
+
+    def satisfiesRequirementsOrCompTooSmall(composition: Composition): Boolean = {
+      val allChampionsSatisfyRequiredRoles = composition.champions.forall(_.roles.exists(requiredRoles.contains))
+      allChampionsSatisfyRequiredRoles || satisfiesRequirements(composition)
+    }
 
     def search_(visited: PriorityQueue[Composition],
                 currentScores: Map[Composition, Long],
@@ -72,14 +85,17 @@ package object domain {
       val (maybeComposition, newVisited) = visited.dequeueMax
       maybeComposition.fold(LazyList.empty[Composition]) { composition =>
         if (composition.champions.size == maxTeamSize)
-          composition #:: search_(newVisited, currentScores, estimatedScores)
+          if (satisfiesRequirements(composition))
+            composition #:: search_(newVisited, currentScores, estimatedScores)
+          else search_(newVisited, currentScores, estimatedScores)
         else {
           val newArgs =
             championPool.foldLeft((newVisited, currentScores, estimatedScores)) {
               case (tmp @ (tmpVisited, tmpCurrentScores, tmpEstimatedScores), champion) =>
                 val tmpComposition = composition.add(champion)
                 val estimatedScore = currentScores(composition) + Math.abs(composition.worth - tmpComposition.worth)
-                if (estimatedScore > currentScores.getOrElse(tmpComposition, 0L)) {
+                if (estimatedScore > currentScores.getOrElse(tmpComposition, 0L) && satisfiesRequirementsOrCompTooSmall(
+                      tmpComposition)) {
                   (tmpVisited.enqueue(tmpComposition), // could be optimized by batch operation
                    tmpCurrentScores + (tmpComposition -> estimatedScore),
                    tmpEstimatedScores + (tmpComposition -> (estimatedScore + heuristic(tmpComposition))))
@@ -90,12 +106,16 @@ package object domain {
       }
     }
 
-    val initialComposition = Composition(requiredChampions)
-    search_(
-      visited = PriorityQueue(initialComposition),
-      currentScores = Map(initialComposition -> 0),
-      estimatedScores = Map(initialComposition -> heuristic(initialComposition))
-    )
+    // a champion has 3 roles max
+    if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * 3) LazyList.empty
+    else {
+      val initialComposition = Composition(requiredChampions)
+      search_(
+        visited = PriorityQueue(initialComposition),
+        currentScores = Map(initialComposition -> 0),
+        estimatedScores = Map(initialComposition -> heuristic(initialComposition))
+      )
+    }
   }
 
 }
