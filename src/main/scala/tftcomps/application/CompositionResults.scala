@@ -23,12 +23,15 @@ object CompositionResults {
     else {
       val worths = props.compositions.map(_.worth)
       <.div(
-        <.p(s"Found ${props.compositions.size} compositions with scores between ${worths.max} and ${worths.min}."),
+        <.p(s"Found ${props.compositions.size} compositions scored between ${worths.max} and ${worths.min} points."),
         <.ol(
+          ^.listStyle := "none",
+          ^.paddingLeft := "0",
           props.compositions.toSeq
             .sortBy(-_.worth)
             .toTagMod(composition =>
-              <.li(^.key := composition.champions.hashCode, compositionDescription(composition))))
+              <.li(^.key := composition.champions.hashCode, ^.marginBottom := "1rem", ChampionComposition(composition)))
+        )
       )
     }
   }

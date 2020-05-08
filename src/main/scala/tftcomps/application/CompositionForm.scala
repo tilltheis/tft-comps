@@ -11,7 +11,7 @@ object CompositionForm {
       ^.marginBottom := ".5rem",
       ^.display := "flex",
       ^.alignItems := "center",
-      <.span(^.display := "inline-block", ^.width := "10rem", s"$title:"),
+      <.div(^.width := "10rem", s"$title:"),
       <.input(
         ^.width := "10rem",
         ^.`type` := "range",
@@ -20,29 +20,27 @@ object CompositionForm {
         ^.value := selectedValue.toString,
         ^.onChange ==> ((e: ReactEventFromInput) => onChange(e.target.value.toInt))
       ),
-      s" $selectedValue"
+      <.div(^.width := "10rem", s" $selectedValue"),
     )
 
     def checkboxSet[A](title: String, possibleValues: Set[A], selectedValues: Set[A])(stringProjection: A => String)(
         onChange: Set[A] => Callback) = <.div(
-      ^.marginBottom := ".5rem",
+      ^.marginBottom := "0.5rem",
       ^.display := "flex",
-      ^.flexDirection := "row",
-      <.span(
+      <.div(
         ^.display := "inline-block",
-        ^.width := "11rem",
+        ^.width := "10rem",
         s"$title:"
       ),
-      <.span(
-        ^.display := "inline-block",
-        ^.width := "100%",
+      <.div(
         ^.columnWidth := "10rem",
+        ^.columnCount := "9",
         ^.columnGap := "0",
         possibleValues.toSeq
           .sortBy(stringProjection)
           .toTagMod(value =>
             <.label(
-              ^.display := "blocK",
+              ^.display := "block",
               <.input(
                 ^.`type` := "checkbox",
                 ^.value := stringProjection(value),
