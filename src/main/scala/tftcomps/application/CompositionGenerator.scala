@@ -35,10 +35,13 @@ object CompositionGenerator {
 
     def findCompositions(compositionConfig: CompositionConfig): LazyList[Composition] = {
       LazyList(0 until 500: _*).flatMap { _ =>
-        search(Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
-               compositionConfig.maxTeamSize)
-          .map(_.last)
-          .take(1)
+        // Shuffle champion list because the order of champions influences the result.
+        // The search algorithm cannot possibly find the perfect solution w/o brute force.
+        search(
+          Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
+          compositionConfig.maxTeamSize,
+          compositionConfig.requiredChampions
+        ).take(1)
       }
     }
 
@@ -61,7 +64,10 @@ object CompositionGenerator {
   val Component =
     ScalaComponent
       .builder[Unit]("Composition Generator")
-      .initialState(State(CompositionConfig(maxTeamSize = 8, maxChampionCost = 5), LazyList.empty, 0))
+      .initialState(
+        State(CompositionConfig(maxTeamSize = 8, maxChampionCost = 5, requiredChampions = Set.empty),
+              compositions = LazyList.empty,
+              compositionRenderLimit = 0))
       .renderBackend[Backend]
       .componentDidMount(mounted => mounted.backend.handleCompositionConfigChange(mounted.state.compositionConfig))
       .build

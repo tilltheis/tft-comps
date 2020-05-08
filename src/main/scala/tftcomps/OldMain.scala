@@ -14,9 +14,7 @@ object OldMain {
 
   val championCompositions = (0 until 1)
     .flatMap { _ =>
-      search(Random.shuffle(data.champions.all.toSeq).filter(_.cost <= MaxCost), MaxTeamSize)
-        .map(_.last)
-        .headOption
+      search(Random.shuffle(data.champions.all.toSeq).filter(_.cost <= MaxCost), MaxTeamSize).headOption
     }
     .distinct
     .sortBy(-_.worth)

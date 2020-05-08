@@ -1,13 +1,13 @@
 package tftcomps.application
 
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.{Callback, ScalaFnComponent, ReactEventFromInput}
+import japgolly.scalajs.react.{Callback, ReactEventFromInput, ScalaFnComponent}
 
 object CompositionForm {
   final case class Props(compositionConfig: CompositionConfig, onCompositionConfigChange: CompositionConfig => Callback)
 
   val Component = ScalaFnComponent[Props] { props =>
-    def numberSlider(title: String, currentValue: Int, maxValue: Int)(onChange: Int => Callback) = <.label(
+    def numberSlider(title: String, possibleValues: Range, selectedValue: Int)(onChange: Int => Callback) = <.label(
       ^.marginBottom := ".5rem",
       ^.display := "flex",
       ^.alignItems := "center",
@@ -15,15 +15,16 @@ object CompositionForm {
       <.input(
         ^.width := "10rem",
         ^.`type` := "range",
-        ^.min := "1",
-        ^.max := maxValue.toString,
-        ^.value := currentValue.toString,
+        ^.min := possibleValues.min,
+        ^.max := possibleValues.max.toString,
+        ^.value := selectedValue.toString,
         ^.onChange ==> ((e: ReactEventFromInput) => onChange(e.target.value.toInt))
       ),
-      s" $currentValue"
+      s" $selectedValue"
     )
 
-    def checkboxSet(title: String, values: Set[String]) = <.div(
+    def checkboxSet[A](title: String, possibleValues: Set[A], selectedValues: Set[A])(stringProjection: A => String)(
+        onChange: Set[A] => Callback) = <.div(
       ^.marginBottom := ".5rem",
       ^.display := "flex",
       ^.flexDirection := "row",
@@ -37,18 +38,32 @@ object CompositionForm {
         ^.width := "100%",
         ^.columnWidth := "10rem",
         ^.columnGap := "0",
-        values.toSeq.sorted
-          .toTagMod(value => <.label(^.display := "blocK", <.input(^.`type` := "checkbox", ^.value := value), value))
+        possibleValues.toSeq
+          .sortBy(stringProjection)
+          .toTagMod(value =>
+            <.label(
+              ^.display := "blocK",
+              <.input(
+                ^.`type` := "checkbox",
+                ^.value := stringProjection(value),
+                ^.onChange ==> { (e: ReactEventFromInput) =>
+                  onChange(if (e.target.checked) selectedValues + value else selectedValues - value)
+                }
+              ),
+              stringProjection(value)
+          ))
       )
     )
 
     <.div(
-      numberSlider("Max Team Size", currentValue = props.compositionConfig.maxTeamSize, maxValue = 10)(x =>
+      numberSlider("Max Team Size", 1 to 10, props.compositionConfig.maxTeamSize)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(maxTeamSize = x))),
-      numberSlider("Max Champion Cost", currentValue = props.compositionConfig.maxChampionCost, maxValue = 5)(x =>
+      numberSlider("Max Champion Cost", 1 to 5, props.compositionConfig.maxChampionCost)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(maxChampionCost = x))),
-      checkboxSet("Required Roles", tftcomps.domain.data.roles.all.map(_.name)),
-      checkboxSet("Required Champions", tftcomps.domain.data.champions.all.map(_.name)),
+      checkboxSet("Required Roles", tftcomps.domain.data.roles.all, Set.empty)(_.name)(_ =>
+        props.onCompositionConfigChange(props.compositionConfig)),
+      checkboxSet("Required Champions", tftcomps.domain.data.champions.all, props.compositionConfig.requiredChampions)(
+        _.name)(x => props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),
     )
   }
 

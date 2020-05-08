@@ -60,16 +60,48 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
 
       "work with elements that have same prio" in {
         val q12 = PriorityQueue("1", "2")(Ordering.by(_.length))
-        val (maybe1Or2, q1Or2) = q12.dequeueMax
-        if (maybe1Or2.contains("1")) {
-          val (maybe2, _) = q1Or2.dequeueMax
-          maybe2 should ===(Some("2"))
-        } else if (maybe1Or2.contains("2")) {
-          val (maybe1, _) = q1Or2.dequeueMax
-          maybe1 should ===(Some("1"))
-        } else {
-          fail(s"illegal value $maybe1Or2")
+        val (maybe1Or2_1, q1Or2) = q12.dequeueMax
+        val (maybe1Or2_2, _) = q1Or2.dequeueMax
+
+        (maybe1Or2_1, maybe1Or2_2) should {
+          equal((Some("1"), Some("2"))) or
+            equal((Some("2"), Some("1")))
         }
+      }
+    }
+  }
+
+  "search" should {
+    "find the best composition (more or less)" in {
+      val role1 = Role("role1", Set(2))
+      val role2 = Role("role2", Set(2))
+      val role3 = Role("role3", Set(3))
+      val role4 = Role("role4", Set(1))
+      val champ1 = Champion("champ1", Set(role1, role2), 1)
+      val champ2 = Champion("champ2", Set(role1), 1)
+      val champ3 = Champion("champ3", Set(role3), 1)
+      val champ4 = Champion("champ4", Set(role2, role4), 1)
+      val allChampions = Seq(champ1, champ2, champ3, champ4)
+
+      search(allChampions, 2).head should {
+        equal(Composition(Set(champ1, champ2))) or
+          equal(Composition(Set(champ1, champ4)))
+      }
+
+      search(allChampions, 3).head should ===(Composition(Set(champ1, champ2, champ4)))
+    }
+
+    "be possible around a required set of champions" in {
+      val role1 = Role("role1", Set(1))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role1), 1)
+      val champ3 = Champion("champ3", Set(role1), 1)
+      val champ4 = Champion("champ4", Set(role1), 1)
+      val allChampions = Seq(champ1, champ2, champ3, champ4)
+
+      search(allChampions, 3, Set(champ1, champ2)).head should {
+        equal(Composition(Set(champ1, champ2, champ3))) or
+          equal(Composition(Set(champ1, champ2, champ4)))
       }
     }
   }

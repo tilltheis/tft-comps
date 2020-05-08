@@ -1,5 +1,7 @@
 package tftcomps
 
+import scala.scalajs.js.Math
+
 package object domain {
   case class Role(name: String, stackingBonusThresholds: Set[Int])
 
@@ -56,31 +58,29 @@ package object domain {
     def empty[A: Ordering]: PriorityQueue[A] = new PriorityQueue[A](Nil)
   }
 
-  def search(championPool: Seq[Champion], maxTeamSize: Int): LazyList[Seq[Composition]] = {
+  def search(championPool: Seq[Champion],
+             maxTeamSize: Int,
+             requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] = {
     implicit val compositionOrdering: Ordering[Composition] = Ordering.by(_.worth)
 
-    def heuristic(composition: Composition): Long = maxTeamSize * (1 + 12) // change between 4 and 12
-
-    def path(predecessors: Map[Composition, Composition], composition: Composition): Seq[Composition] =
-      (composition :: List.unfold(composition)(predecessors.get(_).map(x => (x, x)))).reverse
+    def heuristic(composition: Composition): Long =
+      maxTeamSize * (1 + 12) - composition.worth // change between 4 and 12
 
     def search_(visited: PriorityQueue[Composition],
-                predecessors: Map[Composition, Composition],
                 currentScores: Map[Composition, Long],
-                estimatedScores: Map[Composition, Long]): LazyList[Seq[Composition]] = {
+                estimatedScores: Map[Composition, Long]): LazyList[Composition] = {
       val (maybeComposition, newVisited) = visited.dequeueMax
-      maybeComposition.fold(LazyList.empty[Seq[Composition]]) { composition =>
+      maybeComposition.fold(LazyList.empty[Composition]) { composition =>
         if (composition.champions.size == maxTeamSize)
-          path(predecessors, composition) #:: search_(newVisited, predecessors, currentScores, estimatedScores)
+          composition #:: search_(newVisited, currentScores, estimatedScores)
         else {
           val newArgs =
-            championPool.foldLeft((newVisited, predecessors, currentScores, estimatedScores)) {
-              case (tmp @ (tmpVisited, tmpPredecessors, tmpCurrentScores, tmpEstimatedScores), champion) =>
+            championPool.foldLeft((newVisited, currentScores, estimatedScores)) {
+              case (tmp @ (tmpVisited, tmpCurrentScores, tmpEstimatedScores), champion) =>
                 val tmpComposition = composition.add(champion)
                 val estimatedScore = currentScores(composition) + Math.abs(composition.worth - tmpComposition.worth)
                 if (estimatedScore > currentScores.getOrElse(tmpComposition, 0L)) {
                   (tmpVisited.enqueue(tmpComposition), // could be optimized by batch operation
-                   tmpPredecessors + (tmpComposition -> composition),
                    tmpCurrentScores + (tmpComposition -> estimatedScore),
                    tmpEstimatedScores + (tmpComposition -> (estimatedScore + heuristic(tmpComposition))))
                 } else tmp
@@ -90,11 +90,11 @@ package object domain {
       }
     }
 
+    val initialComposition = Composition(requiredChampions)
     search_(
-      visited = PriorityQueue(Composition.empty),
-      predecessors = Map.empty,
-      currentScores = Map(Composition.empty -> 0),
-      estimatedScores = Map(Composition.empty -> heuristic(Composition.empty))
+      visited = PriorityQueue(initialComposition),
+      currentScores = Map(initialComposition -> 0),
+      estimatedScores = Map(initialComposition -> heuristic(initialComposition))
     )
   }
 
