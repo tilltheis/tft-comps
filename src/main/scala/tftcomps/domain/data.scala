@@ -18,7 +18,7 @@ object data {
     val Protector: Role = Role("Protector", Set(2, 4, 6))
     val Rebel: Role = Role("Rebel", Set(3, 6, 9))
     val Sniper: Role = Role("Sniper", Set(2))
-    val Sorcerer: Role = Role("Sorcerer", Set(2, 4, 5, 8))
+    val Sorcerer: Role = Role("Sorcerer", Set(2, 4, 6, 8))
     val SpacePirate: Role = Role("SpacePirate", Set(2, 4))
     val StarGuardian: Role = Role("StarGuardian", Set(3, 6))
     val Starship: Role = Role("Starship", Set(1))
