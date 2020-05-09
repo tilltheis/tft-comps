@@ -17,7 +17,7 @@ object OldMain {
       search(Random.shuffle(data.champions.all.toSeq).filter(_.cost <= MaxCost), MaxTeamSize).headOption
     }
     .distinct
-    .sortBy(-_.worth)
+    .sortBy(-_.score)
 
   def compositionDescription(composition: Composition): String = {
     val rolesString =
@@ -26,7 +26,7 @@ object OldMain {
         .map { case (role, count) => s"$count ${role.name}" }
         .mkString(", ")
     val champsString = composition.champions.map(_.name).toSeq.sorted.mkString(", ")
-    s"[${composition.worth}] (${composition.roles.size}) $rolesString ($champsString)"
+    s"[${composition.score}] (${composition.roles.size}) $rolesString ($champsString)"
   }
 
   val roleCompositions = championCompositions
@@ -34,16 +34,16 @@ object OldMain {
     .groupBy(_.synergies.toSeq.sortBy(-_._2))
     .toSeq
     .sortBy(-_._2.size)
-  //.sortBy(-_._2.head.worth)
+  //.sortBy(-_._2.head.score)
 
   println(
-    s"Found ${roleCompositions.size} role compositions scored between ${championCompositions.map(_.worth).max} and ${championCompositions.map(_.worth).min} worth.")
+    s"Found ${roleCompositions.size} role compositions scored between ${championCompositions.map(_.score).max} and ${championCompositions.map(_.score).min} points.")
   println()
 
   println("Highlight:")
   roleCompositions
     .filter(_._2.size >= 3)
-    .sortBy(-_._2.head.worth)
+    .sortBy(-_._2.head.score)
     .zipWithIndex
     .map {
       case ((mainRoles, comps), index) =>
@@ -53,7 +53,7 @@ object OldMain {
 //          .map { case (role, count) => s"${comps.head.champions.count(_.roles.contains(role))} ${role.name}" }
           .map { case (role, count) => s"$count ${role.name}" }
           .mkString(", ")
-        f"$index%3d [${comps.head.worth}%3d] $rolesString (${comps.size}x)"
+        f"$index%3d [${comps.head.score}%3d] $rolesString (${comps.size}x)"
     }
     .foreach(println)
   println()
@@ -66,7 +66,7 @@ object OldMain {
         //.map(_.name)
           .map { case (role, count) => s"$count ${role.name}" }
           .mkString(", ")
-        f"$index%3d [${comps.head.worth}%3d] $rolesString (${comps.size}x)"
+        f"$index%3d [${comps.head.score}%3d] $rolesString (${comps.size}x)"
     }
     .foreach(println)
 

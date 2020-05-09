@@ -14,7 +14,7 @@ package object domain {
 
     val size: Long = champions.size
 
-    val worth: Int =
+    val score: Int =
       if (size == 0) 0
       else
         roles.map {
@@ -39,7 +39,7 @@ package object domain {
 
     def add(champion: Champion): Composition = Composition(champions + champion)
 
-    override def toString: String = s"Composition($champions)[$worth]"
+    override def toString: String = s"Composition($champions)[$score]"
   }
   object Composition {
     val empty: Composition = Composition(Set.empty)
@@ -62,10 +62,10 @@ package object domain {
              maxTeamSize: Int,
              requiredRoles: Set[Role] = Set.empty,
              requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] = {
-    implicit val compositionOrdering: Ordering[Composition] = Ordering.by(_.worth)
+    implicit val compositionOrdering: Ordering[Composition] = Ordering.by(_.score)
 
     def heuristic(composition: Composition): Long =
-      maxTeamSize * (1 + 12) - composition.worth // change between 4 and 12
+      maxTeamSize * (1 + 12) - composition.score // change between 4 and 12
 
     def satisfiesRequirements(composition: Composition): Boolean = {
       val satisfiesRoles = requiredRoles.forall(requiredRole =>
@@ -98,7 +98,7 @@ package object domain {
             championPool.foldLeft((newVisited, currentScores, estimatedScores)) {
               case (tmp @ (tmpVisited, tmpCurrentScores, tmpEstimatedScores), champion) =>
                 val tmpComposition = composition.add(champion)
-                val estimatedScore = currentScores(composition) + Math.abs(composition.worth - tmpComposition.worth)
+                val estimatedScore = currentScores(composition) + Math.abs(composition.score - tmpComposition.score)
                 if (estimatedScore > currentScores.getOrElse(tmpComposition, 0L) && satisfiesRequirementsOrCompTooSmall(
                       tmpComposition)) {
                   (tmpVisited.enqueue(tmpComposition), // could be optimized by batch operation

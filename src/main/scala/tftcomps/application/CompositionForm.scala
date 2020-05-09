@@ -8,34 +8,30 @@ object CompositionForm {
 
   val Component = ScalaFnComponent[Props] { props =>
     def numberSlider(title: String, possibleValues: Range, selectedValue: Int)(onChange: Int => Callback) = <.label(
-      ^.marginBottom := ".5rem",
+      ^.marginBottom := 0.5.rem,
       ^.display := "flex",
       ^.alignItems := "center",
-      <.div(^.width := "10rem", s"$title:"),
+      <.div(^.width := 10.rem, s"$title:"),
       <.input(
-        ^.width := "10rem",
+        ^.width := 10.rem,
         ^.`type` := "range",
         ^.min := possibleValues.min,
-        ^.max := possibleValues.max.toString,
-        ^.value := selectedValue.toString,
+        ^.max := possibleValues.max,
+        ^.value := selectedValue,
         ^.onChange ==> ((e: ReactEventFromInput) => onChange(e.target.value.toInt))
       ),
-      <.div(^.width := "10rem", s" $selectedValue"),
+      <.div(^.width := 10.rem, s" $selectedValue"),
     )
 
     def checkboxSet[A](title: String, possibleValues: Set[A], selectedValues: Set[A])(stringProjection: A => String)(
         onChange: Set[A] => Callback) = <.div(
-      ^.marginBottom := "0.5rem",
+      ^.marginBottom := 0.5.rem,
       ^.display := "flex",
+      <.div(^.width := 10.rem, s"$title:"),
       <.div(
-        ^.display := "inline-block",
-        ^.width := "10rem",
-        s"$title:"
-      ),
-      <.div(
-        ^.columnWidth := "10rem",
+        ^.columnWidth := 10.rem,
         ^.columnCount := "9",
-        ^.columnGap := "0",
+        ^.columnGap := 0.rem,
         possibleValues.toSeq
           .sortBy(stringProjection)
           .toTagMod(value =>

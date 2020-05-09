@@ -11,11 +11,11 @@ object ChampionComposition {
   val Component = ScalaFnComponent[Props] { props =>
     <.div(
       ^.display := "flex",
-      <.h3(^.width := "10rem", props.composition.worth.toString, <.small(" points")),
+      <.h3(^.width := 10.rem, props.composition.score.toString, <.small(" points")),
       <.ol(
         ^.listStyle := "none",
-        ^.paddingLeft := "0",
-        ^.width := "10rem",
+        ^.paddingLeft := 0.rem,
+        ^.width := 10.rem,
         props.composition.roles.toSeq
           .sortBy {
             case (role, count) =>
@@ -38,12 +38,12 @@ object ChampionComposition {
       <.ul(
         ^.display := "flex",
         ^.listStyle := "none",
-        ^.paddingLeft := "0",
+        ^.paddingLeft := 0.rem,
         props.composition.champions.toSeq.sortBy(_.name).toTagMod { champion =>
           <.li(
-            ^.width := "10rem",
+            ^.width := 10.rem,
             <.h3(champion.name),
-            <.ul(^.paddingLeft := "0",
+            <.ul(^.paddingLeft := 0.rem,
                  champion.roles.toSeq
                    .sortBy(_.name)
                    .toTagMod(role => <.li(^.listStyle := "none", role.name)))

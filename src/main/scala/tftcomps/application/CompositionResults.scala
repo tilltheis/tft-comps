@@ -9,28 +9,18 @@ object CompositionResults {
   final case class Props(compositions: Set[Composition])
 
   val Component = ScalaFnComponent[Props] { props =>
-    def compositionDescription(composition: Composition): String = {
-      val rolesString =
-        composition.roles.toSeq
-          .sortBy { case (role, count) => (-count, role.name) }
-          .map { case (role, count) => s"$count ${role.name}" }
-          .mkString(", ")
-      val champsString = composition.champions.map(_.name).toSeq.sorted.mkString(", ")
-      s"[${composition.worth}] (${composition.roles.size}) $rolesString ($champsString)"
-    }
-
-    if (props.compositions.isEmpty) <.div("No results.")
+    if (props.compositions.isEmpty) <.p("No results.")
     else {
-      val worths = props.compositions.map(_.worth)
+      val scores = props.compositions.map(_.score)
       <.div(
-        <.p(s"Found ${props.compositions.size} compositions scored between ${worths.max} and ${worths.min} points."),
+        <.p(s"Found ${props.compositions.size} compositions scored between ${scores.max} and ${scores.min} points."),
         <.ol(
           ^.listStyle := "none",
-          ^.paddingLeft := "0",
+          ^.paddingLeft := 0.rem,
           props.compositions.toSeq
-            .sortBy(-_.worth)
+            .sortBy(-_.score)
             .toTagMod(composition =>
-              <.li(^.key := composition.champions.hashCode, ^.marginBottom := "1rem", ChampionComposition(composition)))
+              <.li(^.key := composition.champions.hashCode, ^.marginBottom := 1.rem, ChampionComposition(composition)))
         )
       )
     }
