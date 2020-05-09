@@ -20,14 +20,14 @@ package object domain {
         roles.map {
           case (role, count) =>
             // filter for x > 1 or Mercenary and Starship would be included in the beginning of every comp
-            val multiplierOffset = role.stackingBonusThresholds.filter(x => x > 1 && x <= count).maxOption.fold(0) {
+            val multiplier = role.stackingBonusThresholds.filter(x => x > 1 && x <= count).maxOption.fold(0) {
               reachedThreshold =>
                 val thresholdIndex = role.stackingBonusThresholds.toSeq.sorted.indexOf(reachedThreshold)
                 (thresholdIndex + 1) * (12 / role.stackingBonusThresholds.size) // this favors fully stacked roles
 //                thresholdIndex + 1 // this favors roles with many thresholds
             }
-            count * (1 + multiplierOffset)
-        }.sum
+            count * multiplier
+        }.sum + size.toInt
 
     val synergies: Map[Role, Int] = roles
       .map {

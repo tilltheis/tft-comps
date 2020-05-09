@@ -12,6 +12,11 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val role3 = Role("role3", Set(3))
       val role24 = Role("role24", Set(2, 4))
 
+      "give non empty compositions a rating above zero" in {
+        Composition(Set.empty).worth should ===(0)
+        Composition(Set(Champion("champ", Set(role2), 1))).worth should ===(1)
+      }
+
       "give champions belonging the same role a multiplier according to the reached role level threshold" in {
         Composition(Set(Champion("champ1", Set(role1), 1))).worth should ===(1) // 1 champ thresholds don't count
         Composition(Set(Champion("champ1", Set(role2), 1), Champion("champ2", Set(role2), 1))).worth should ===(
@@ -31,6 +36,19 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
               Champion("champ2", Set(role24), 1),
               Champion("champ3", Set(role24), 1),
               Champion("champ4", Set(role24), 1))).worth should ===(4 * 12 + 4) // max threshold reached
+      }
+
+      "only count roles that have reached a stacking threshold greater than one" in {
+        Composition(Set(Champion("champ1", Set(role1), 1))).worth should ===(1)
+        Composition(Set(Champion("champ2", Set(role2), 1))).worth should ===(1)
+        Composition(Set(Champion("champ3", Set(role1, role2), 1))).worth should ===(1)
+        Composition(Set(Champion("champ1", Set(role1), 1), Champion("champ2", Set(role2), 1))).worth should ===(2)
+        Composition(Set(Champion("champ1", Set(role1), 1),
+                        Champion("champ2", Set(role2), 1),
+                        Champion("champ3", Set(role1), 1))).worth should ===(3)
+        Composition(Set(Champion("champ1", Set(role1), 1),
+                        Champion("champ2", Set(role2), 1),
+                        Champion("champ3", Set(role2), 1))).worth should ===(27)
       }
     }
   }
