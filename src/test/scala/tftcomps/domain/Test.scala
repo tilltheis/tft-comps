@@ -4,6 +4,8 @@ import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import scala.util.Random
+
 class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
   "Composition" when {
     "score" should {
@@ -117,7 +119,9 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      search(allChampions, 3, requiredChampions = Set(champ1, champ2)).head should {
+      val result = search(allChampions, 3, requiredChampions = Set(champ1, champ2))
+      result should not be empty
+      result.head should {
         equal(Composition(Set(champ1, champ2, champ3))) or
           equal(Composition(Set(champ1, champ2, champ4)))
       }
@@ -146,11 +150,13 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ6 = Champion("champ6", Set(role3), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4, champ5, champ6)
 
-      search(allChampions, 3, requiredRoles = Set(role1, role2)).head.roles.keySet should contain allElementsOf (Set(
-        role1,
-        role2))
+      val result1 = search(allChampions, 3, requiredRoles = Set(role1, role2))
+      result1 should not be empty
+      result1.head.roles.keySet should contain allElementsOf (Set(role1, role2))
 
-      search(allChampions, 2, requiredRoles = Set(role3)).head.roles.keySet should contain allElementsOf (Set(role3))
+      val result2 = search(allChampions, 2, requiredRoles = Set(role3))
+      result2 should not be empty
+      result2.head.roles.keySet should contain allElementsOf (Set(role3))
     }
 
     "find nothing when the number of required roles is greater than the team size" in {
@@ -188,6 +194,79 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
 
       search(allChampions, 4, requiredRoles = Set(role1), requiredChampions = Set(champ4)) should ===(
         LazyList(Composition(Set(champ1, champ2, champ3, champ4))))
+    }
+
+    "find something in the real dataset" ignore {
+      def compositionDescription(composition: Composition): String = {
+        val rolesString =
+          composition.roles.toSeq
+            .sortBy { case (role, count) => (-count, role.name) }
+            .map { case (role, count) => s"$count ${role.name}" }
+            .mkString(", ")
+        val champsString = composition.champions.map(_.name).toSeq.sorted.mkString(", ")
+        s"[${composition.score}] (${composition.roles.size}) $rolesString ($champsString)"
+      }
+      val result = search2(Random.shuffle(data.champions.all.toSeq), 8)
+      println("total result count = " + result.toVector.size)
+      println(
+        result
+//          .take(250)
+        .toVector
+          .map {
+            case (composition, length) =>
+              s"length=$length size=${composition.size} ${compositionDescription(composition)}"
+          }
+          .mkString("\n"))
+      result.take(1).toVector should not be empty
+    }
+  }
+
+  "AnyRoleThresholdSearchBackend" should {
+    val d = AnyRoleThresholdSearchBackend.distance _
+    val h = AnyRoleThresholdSearchBackend.heuristic(_, 3)
+
+    val role1 = Role("role1", Set(2))
+    val role2 = Role("role2", Set(2))
+    val role3 = Role("role3", Set(2))
+    val champ1 = Champion("champ1", Set(role1), 1)
+    val champ2 = Champion("champ2", Set(role2), 1)
+    val champ3 = Champion("champ3", Set(role1), 1)
+    val champ4 = Champion("champ4", Set(role3), 1)
+    val champ5 = Champion("champ5", Set(role2), 1)
+    val comp0 = Composition(Set.empty)
+    val comp1 = Composition(Set(champ1))
+    val comp2 = Composition(Set(champ1, champ2))
+    val comp3 = Composition(Set(champ1, champ3))
+    val comp4 = Composition(Set(champ1, champ2, champ4))
+    val comp5 = Composition(Set(champ1, champ2, champ5))
+
+    // does it, though?
+    "heuristic should always be smaller for bigger teams than for smaller teams " ignore {
+      h(comp0) should be > h(comp1)
+      h(comp1) should be > h(comp2)
+      h(comp1) should be > h(comp3)
+      h(comp3) should be > h(comp4)
+      h(comp3) should be > h(comp5)
+      h(comp4) should be > h(comp5)
+    }
+
+    "heuristic should follow a formula" in {
+      // max( numberOfOpenRoles / maxRolesPerChampion, numberOfMissingChampions )
+      h(comp0) should ===(3) // team size
+      h(comp1) should ===(2) // team size
+      h(comp2) should ===(1) // open thresholds and team size
+      h(comp3) should ===(1) // team size
+      h(comp4) should ===(1) // open thresholds
+      h(comp5) should ===(0) // perfect
+    }
+
+    "distance should follow a formula" in {
+      // 1 + open thresholds
+      d(comp0, champ1) should ===(1 + 1)
+      d(comp1, champ2) should ===(1 + 2)
+      d(comp1, champ3) should ===(1)
+      d(comp2, champ4) should ===(1 + 3)
+      d(comp2, champ5) should ===(1 + 1)
     }
   }
 }

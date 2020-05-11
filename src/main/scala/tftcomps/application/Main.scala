@@ -1,4 +1,4 @@
-package tftcomps
+package tftcomps.application
 
 import org.scalajs.dom.document
 import tftcomps.application.CompositionGenerator

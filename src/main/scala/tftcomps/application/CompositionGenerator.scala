@@ -3,25 +3,25 @@ package tftcomps.application
 import japgolly.scalajs.react.{Callback, CallbackTo, ScalaComponent}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Unmounted}
 import japgolly.scalajs.react.vdom.html_<^._
-import tftcomps.domain.{Composition, data, search}
+import tftcomps.domain.{Composition, data, search2}
 
 import scala.util.Random
 
 object CompositionGenerator {
   final case class State(compositionConfig: CompositionConfig,
-                         compositions: LazyList[Composition],
+                         compositions: LazyList[(Composition, Int)],
                          compositionRenderLimit: Long)
 
   final case class Backend($ : BackendScope[Unit, State]) {
     private var compositionPullTimeoutHandler: Option[scalajs.js.timers.SetTimeoutHandle] = None
 
-    def startPullingCompositions(compositions: LazyList[Composition]): Callback = Callback {
+    def startPullingCompositions(compositions: LazyList[(Composition, Int)]): Callback = Callback {
       compositionPullTimeoutHandler.foreach(scalajs.js.timers.clearTimeout)
       compositionPullTimeoutHandler =
         Some(scalajs.js.timers.setTimeout(0)(pullNextComposition(compositions.iterator).runNow()))
     }
 
-    private def pullNextComposition(iterator: Iterator[Composition]): Callback = {
+    private def pullNextComposition(iterator: Iterator[(Composition, Int)]): Callback = {
       val pullNext = CallbackTo(iterator.hasNext)
       val scheduleNextPull = CallbackTo {
         compositionPullTimeoutHandler = Some(scalajs.js.timers.setTimeout(0) {
@@ -33,16 +33,17 @@ object CompositionGenerator {
       pullNext >>= (hasNext => if (hasNext) updateState >> scheduleNextPull else Callback.empty)
     }
 
-    def findCompositions(compositionConfig: CompositionConfig): LazyList[Composition] = {
+    def findCompositions(compositionConfig: CompositionConfig): LazyList[(Composition, Int)] = {
       LazyList(0 until 500: _*).flatMap { _ =>
         // Shuffle champion list because the order of champions influences the result.
         // The search algorithm cannot possibly find the perfect solution w/o brute force.
-        search(
+        search2(
           Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
           compositionConfig.maxTeamSize,
           compositionConfig.requiredRoles,
           compositionConfig.requiredChampions
-        ).take(1)
+        )
+//          .take(1)
       }
     }
 
@@ -57,7 +58,7 @@ object CompositionGenerator {
       <.div(
         <.h1("TFT Team Composition Generator"),
         CompositionForm(state.compositionConfig, handleCompositionConfigChange),
-        CompositionResults(state.compositions.take(state.compositionRenderLimit.toInt).toSet)
+        CompositionResults(state.compositions.take(state.compositionRenderLimit.toInt))
       )
     }
   }

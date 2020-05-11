@@ -6,12 +6,12 @@ import tftcomps.domain.Composition
 
 object ChampionComposition {
 
-  final case class Props(composition: Composition)
+  final case class Props(composition: Composition, score: Int)
 
   val Component = ScalaFnComponent[Props] { props =>
     <.div(
       ^.display := "flex",
-      <.h3(^.width := 10.rem, props.composition.score.toString, <.small(" points")),
+      <.h3(^.width := 10.rem, s"${props.score.toString} (${props.composition.score.toString})", <.small(" points")),
       <.ol(
         ^.listStyle := "none",
         ^.paddingLeft := 0.rem,
@@ -53,5 +53,5 @@ object ChampionComposition {
     )
   }
 
-  def apply(composition: Composition) = Component(Props(composition))
+  def apply(composition: Composition, score: Int) = Component(Props(composition, score))
 }
