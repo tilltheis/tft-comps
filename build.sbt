@@ -1,10 +1,9 @@
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 import scalajsbundler.sbtplugin.ScalaJSBundlerPlugin.autoImport.npmDependencies
 
+lazy val root = project.in(file(".")).aggregate(tftcomps.js, tftcomps.jvm)
 
-lazy val tftcomps = project.in(file(".")).aggregate(cross.js, cross.jvm)
-
-lazy val cross = crossProject(JSPlatform, JVMPlatform)
+lazy val tftcomps = crossProject(JSPlatform, JVMPlatform)
   .in(file("."))
   .settings(
     name := "tft-comps",
@@ -21,9 +20,7 @@ lazy val cross = crossProject(JSPlatform, JVMPlatform)
     // Add JS-specific settings here
     scalaJSUseMainModuleInitializer := true,
     webpackBundlingMode := BundlingMode.LibraryOnly(),
-    libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "1.6.0",
+    libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "1.7.0",
     npmDependencies in Compile ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1"),
   )
-
-lazy val js = cross.js.enablePlugins(ScalaJSBundlerPlugin)
-lazy val jvm = cross.jvm
+  .enablePlugins(ScalaJSBundlerPlugin)
