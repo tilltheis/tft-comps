@@ -1,8 +1,5 @@
 package tftcomps
 
-import scala.collection.immutable.Stream.Cons
-import scala.scalajs.js.Math
-
 package object domain {
   val MinRolesPerChampion = 2
   val MaxRolesPerChampion = 3 // Irelia, Gankplank, MissFortune
@@ -156,9 +153,14 @@ package object domain {
   trait SearchBackend {
     def distance(composition: Composition, champion: Champion): Int
     def heuristic(composition: Composition, maxTeamSize: Int): Int
+    def qualityPercentage(composition: Composition): Double
   }
 
   object AnyRoleThresholdSearchBackend extends SearchBackend {
+    // todo: don't count single threshold roles as imperfection
+    def qualityPercentage(composition: Composition): Double =
+      1.0d - composition.reachedThresholds.count(_._2 == 0).toDouble / composition.reachedThresholds.size
+
     // distance is at least one - minimum possible distance for team would be team size
     override def distance(composition: Composition, champion: Champion): Int =
       if (composition.champions.contains(champion)) 0 // shouldn't happen
@@ -168,7 +170,7 @@ package object domain {
         val openThresholdCount = unreachedThresholdCountAfter - unreachedThresholdCountBefore
         (MaxRolesPerChampion + 1) - openThresholdCount
 
-        1 + unreachedThresholdCountAfter
+        1 + unreachedThresholdCountAfter * 10
       }
 
     // if admissible (doesn't overestimate) then the best shortest path will be found but that can be slow
@@ -176,15 +178,18 @@ package object domain {
       val unreachedThresholdCount = composition.reachedThresholds.count(_._2 == 0)
 //      val distanceToDestination = (MaxRolesPerChampion + 1) * (maxTeamSize - composition.size)
       val distanceToDestination = maxTeamSize - composition.size
-      val fewestStepsToReachThresholds = Math.floor(unreachedThresholdCount.toDouble / MaxRolesPerChampion).toInt
-      val res = Math.max(distanceToDestination, fewestStepsToReachThresholds)
-//      println(
-//        s"unreachedThresholdCount=$unreachedThresholdCount distanceToDestination=$distanceToDestination fewestStepsToReachThresholds=$fewestStepsToReachThresholds res=$res")
-      res
+//      val fewestStepsToReachThresholds = Math.ceil(unreachedThresholdCount.toDouble / MaxRolesPerChampion).toInt
+//      val res = Math.max(distanceToDestination, fewestStepsToReachThresholds)
+////      println(
+////        s"unreachedThresholdCount=$unreachedThresholdCount distanceToDestination=$distanceToDestination fewestStepsToReachThresholds=$fewestStepsToReachThresholds res=$res")
+//      res
+      distanceToDestination + unreachedThresholdCount * 10
     }
   }
 
   object AbsoluteRoleThresholdsSearchBackend extends SearchBackend {
+    def qualityPercentage(composition: Composition): Double = 0.0d
+
     // distance is at least one - minimum possible distance for team would be team size
     override def distance(composition: Composition, champion: Champion): Int =
       if (composition.champions.contains(champion)) 0 // shouldn't happen
@@ -212,9 +217,9 @@ package object domain {
   def search2(championPool: Seq[Champion],
               maxTeamSize: Int,
               requiredRoles: Set[Role] = Set.empty,
-              requiredChampions: Set[Champion] = Set.empty): LazyList[(Composition, Int)] = {
-//    val backend: SearchBackend = AnyRoleThresholdSearchBackend
-    val backend: SearchBackend = AbsoluteRoleThresholdsSearchBackend
+              requiredChampions: Set[Champion] = Set.empty): LazyList[(Composition, Double)] = {
+    val backend: SearchBackend = AnyRoleThresholdSearchBackend
+//    val backend: SearchBackend = AbsoluteRoleThresholdsSearchBackend
 
     def satisfiesRequirements(composition: Composition): Boolean = {
       val satisfiesRoles = requiredRoles.forall(requiredRole =>
@@ -233,13 +238,8 @@ package object domain {
         .forall(requiredChampions.contains)
     }
 
-    // morning idea 1: always initialize with role (loop), best first search for teamsize-2 and a* for last 1 or 2 levels
-
-    // idea 1: best first search, return first result, backtrack, try 2 levels more
-    // idea 2: combine 2 algos: first 2 or 3 levels: a* and feed result as input into best first algo
-    // idea 3: seed search with 1 or 2 role (maybe using Set#subsets for variation, eg (0 until 9).toSet.subsets(3).size * 23 = 1932)
-    // idea 4: best first search but backtrack on 1st and 2nd level for producing many results
-    // idea 5: create 10 examples for role on 1st level, also on 2nd level, present in gui as group of role1-role2 combo, calculate more when user looks into groupo
+    // idea: always initialize with role (loop), best first search for teamsize-2 and a* for last 1 or 2 levels
+    // idea: seed search with 1 or 2 role (maybe using Set#subsets for variation, eg (0 until 9).toSet.subsets(3).size * 23 = 1932)
 
     /**
       * This impl is super slow but follows the textbook A* code.
@@ -248,6 +248,7 @@ package object domain {
       *               - use only g => uniform-cost search
       *               - use only h => greedy best-first search
       *               - use both g and h => A* search
+      * @return pairs of composition and their fScore
       */
     def naiveGenericSearch(fScore: (Int, Int) => Int)(openSet: List[Composition],
                                                       g: Map[Composition, Int],
@@ -284,7 +285,8 @@ package object domain {
     /**
       * This impl is quite fast because it follows the IDA* code.
       */
-    def genericSearch(f: (Int, Int) => Int)(root: Composition, limit: Int): LazyList[(Composition, Int)] = {
+    def genericSearch(
+        f: (Int, Int) => Int)(root: Composition, limit: Int, initialCost: Int = 0): LazyList[(Composition, Int)] = {
       val h = backend.heuristic(_, limit)
       val d = backend.distance _
 
@@ -296,8 +298,8 @@ package object domain {
 
         if (!satisfiesRequirementsOrCompTooSmall(composition)) Left(Int.MaxValue)
         else if (fScore > bound) Left(fScore)
-        else if (composition.size == limit)
-          if (satisfiesRequirements(composition)) Right(composition -> gScore)
+        else if (composition.size == limit) // todo: think about only allowing perfect synergies
+          if (satisfiesRequirements(composition)) Right(composition -> fScore)
           else Left(Int.MaxValue)
         else
           championPool
@@ -305,68 +307,55 @@ package object domain {
             .foldLeft[Either[Int, (Composition, Int)]](Left(Int.MaxValue)) {
               case (x @ Right(_), _) => x
               case (Left(tmpMin), champion) =>
-                val t = go(composition.add(champion), gScore + d(composition, champion), bound)
-                t.left.map(Math.min(_, tmpMin))
+                val result = go(composition.add(champion), gScore + d(composition, champion), bound)
+                result.left.map(Math.min(_, tmpMin))
             }
       }
 
-      var bound = h(root)
-      var searchInProgress = true
-      var result = None: Option[(Composition, Int)]
-
-      while (searchInProgress) {
-        go(root, 0, bound) match {
-          case Left(Int.MaxValue)                          => searchInProgress = false
-          case Left(newBound)                              => bound = newBound
-          case Right((composition: Composition, newBound)) =>
-//          case Right((path, newBound)) =>
-//            path.reverse.zip(path.reverse.tail).foreach {
-//              case (compBefore, compAfter) =>
-//                (compAfter.champions -- compBefore.champions).headOption match {
-//                  case None =>
-//                    println(s"adding champ to comp yielded same comp?!\nbefore: $compBefore\nafter: $compAfter")
-//                  case Some(newChamp) => println(s"added $newChamp for cost ${d(compBefore, newChamp)}")
-//                }
-//            }
-            result = Some(composition, newBound)
-            searchInProgress = false
+      val results = LazyList.unfold(h(root)) { bound =>
+        go(root, initialCost, bound) match {
+          case Left(Int.MaxValue)             => None
+          case Left(newBound)                 => Some((None, newBound))
+          case Right(composition -> newBound) => Some(Some((composition, newBound)), Int.MaxValue)
         }
       }
 
-      LazyList(result.toSeq: _*)
+      results.collect {
+//        case Some(composition -> _bound) => composition -> backend.imperfectness(composition)
+        case Some(x) => x
+      }
     }
 
-    val idaStarSearch = genericSearch((g, h) => g + h) _
-//    val greedySearch = genericSearch((g, h) => h) _
-    val greedySearch = idaStarSearch
+    val nonGreedySearch = genericSearch((g, h) => g + h) _
+    val greedySearch = genericSearch((g, h) => h) _
 
     if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) LazyList.empty
     else {
-//      aStarSearch(Composition.empty, maxTeamSize)
       val initialComposition = Composition(requiredChampions)
-
-      val firstTeamSize = Math.max(0, maxTeamSize - 3)
+      val firstTeamSize = Math.max(0, maxTeamSize - 2)
       val firstResult: LazyList[(Composition, Int)] = greedySearch(
         initialComposition,
-        firstTeamSize
+        firstTeamSize,
+        0
       ).take(1) // todo dont forget
-
-      println("first result = " + firstResult.toVector.toString)
 
       val secondResult = firstResult.headOption.fold(LazyList.empty[(Composition, Int)]) {
         case (secondInitComp, secondInitCost) =>
           val secondTeamSize = maxTeamSize
-          idaStarSearch(
+          nonGreedySearch(
             secondInitComp,
-            secondTeamSize
-          ).map { case (composition, length) => composition -> (length + secondInitCost) }
+            secondTeamSize,
+            secondInitCost
+          ).map { case (composition, finalCost) => composition -> (finalCost) }
       }
 
-      secondResult
+      secondResult.map {
+        case composition -> _bound => composition -> backend.qualityPercentage(composition)
+      }
     }
 
-//    val aStarSearch = genericSearch((g, h) => g + h) _
-//    val greedySearch = genericSearch((g, h) => h) _
+//    val aStarSearch = naiveGenericSearch((g, h) => g + h) _
+//    val greedySearch = naiveGenericSearch((g, h) => h) _
 //
 //    if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) LazyList.empty
 //    else {
@@ -392,6 +381,7 @@ package object domain {
 //
 //      secondResult
 //    }
+
 //    if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) LazyList.empty
 //    else {
 //      val initialComposition = Composition(requiredChampions)

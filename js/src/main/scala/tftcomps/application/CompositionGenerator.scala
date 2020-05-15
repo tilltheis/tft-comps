@@ -9,22 +9,22 @@ import scala.util.Random
 
 object CompositionGenerator {
   final case class State(compositionConfig: CompositionConfig,
-                         compositions: LazyList[(Composition, Int)],
+                         compositions: LazyList[(Composition, Double)],
                          compositionRenderLimit: Long)
 
   final case class Backend($ : BackendScope[Unit, State]) {
     private var compositionPullTimeoutHandler: Option[scalajs.js.timers.SetTimeoutHandle] = None
 
-    def startPullingCompositions(compositions: LazyList[(Composition, Int)]): Callback = Callback {
+    def startPullingCompositions(compositions: LazyList[(Composition, Double)]): Callback = Callback {
       compositionPullTimeoutHandler.foreach(scalajs.js.timers.clearTimeout)
       compositionPullTimeoutHandler =
         Some(scalajs.js.timers.setTimeout(0)(pullNextComposition(compositions.iterator).runNow()))
     }
 
-    private def pullNextComposition(iterator: Iterator[(Composition, Int)]): Callback = {
+    private def pullNextComposition(iterator: Iterator[(Composition, Double)]): Callback = {
       val pullNext = CallbackTo(iterator.hasNext)
       val scheduleNextPull = CallbackTo {
-        compositionPullTimeoutHandler = Some(scalajs.js.timers.setTimeout(0) {
+        compositionPullTimeoutHandler = Some(scalajs.js.timers.setTimeout(1) {
           val _ = iterator.next()
           pullNextComposition(iterator).runNow()
         })
@@ -33,7 +33,7 @@ object CompositionGenerator {
       pullNext >>= (hasNext => if (hasNext) updateState >> scheduleNextPull else Callback.empty)
     }
 
-    def findCompositions(compositionConfig: CompositionConfig): LazyList[(Composition, Int)] = {
+    def findCompositions(compositionConfig: CompositionConfig): LazyList[(Composition, Double)] = {
       LazyList(0 until 500: _*).flatMap { _ =>
         // Shuffle champion list because the order of champions influences the result.
         // The search algorithm cannot possibly find the perfect solution w/o brute force.
@@ -42,8 +42,7 @@ object CompositionGenerator {
           compositionConfig.maxTeamSize,
           compositionConfig.requiredRoles,
           compositionConfig.requiredChampions
-        )
-//          .take(1)
+        ).take(1)
       }
     }
 
@@ -58,7 +57,10 @@ object CompositionGenerator {
       <.div(
         <.h1("TFT Team Composition Generator"),
         CompositionForm(state.compositionConfig, handleCompositionConfigChange),
-        CompositionResults(state.compositions.take(state.compositionRenderLimit.toInt))
+        CompositionResults(state.compositions
+          .take(state.compositionRenderLimit.toInt)
+          .distinctBy(_._1.champions.map(_.name).mkString) // this shouldn't be necessary but `.toSet` yields duplicates
+          .toSet)
       )
     }
   }
