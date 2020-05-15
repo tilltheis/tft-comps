@@ -21,7 +21,7 @@ object CompositionResults {
           ^.flexWrap := "wrap",
           ^.alignContent := "flex-start",
           ^.height := 2.rem,
-          props.compositions.groupBy(_._2).toTagMod {
+          props.compositions.groupBy(_._2).toSeq.sortBy(-_._1).toTagMod {
             case (distance, comps) =>
               React.Fragment(
                 <.dt(^.width := 10.rem, ^.height := 1.rem, ^.fontWeight := "bold", s"${(distance * 100).toInt}%"),

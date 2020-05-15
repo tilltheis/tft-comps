@@ -158,51 +158,60 @@ package object domain {
     def qualityPercentage(composition: Composition): Double
   }
 
-  object AnyRoleThresholdSearchBackend extends SearchBackend {
+  object MinRoleThresholdSearchBackend extends SearchBackend {
+    private val Multiplier = 10 // grow values because composition values don't have big value diffs between them
+
     // todo: don't count single threshold roles as imperfection
     def qualityPercentage(composition: Composition): Double =
-      1.0d - missingRoleSlotCount(composition).toDouble / composition.champions.toSeq.map(_.roles.size).sum
+      1.0d - missingRoleSlotCount(composition).toDouble / composition.roles.values.sum
 
     // distance is at least one - minimum possible distance for team would be team size
     override def distance(composition: Composition, champion: Champion): Int =
       if (composition.champions.contains(champion)) 0 // shouldn't happen
       else {
         val unreachedThresholdCount = missingRoleSlotCount(composition.add(champion))
-        1 + unreachedThresholdCount * 10
+        1 + unreachedThresholdCount * Multiplier
       }
 
     // if admissible (doesn't overestimate) then the best shortest path will be found but that can be slow
     override def heuristic(composition: Composition, maxTeamSize: Int): Int = {
       val unreachedThresholdCount = missingRoleSlotCount(composition)
       val distanceToDestination = maxTeamSize - composition.size
-      distanceToDestination + unreachedThresholdCount * 10
+      distanceToDestination + unreachedThresholdCount * Multiplier
     }
 
     private def missingRoleSlotCount(composition: Composition) =
-      composition.reachedThresholds.collect {
-        case (role, 0) => composition.roleMembers(role).size
+      composition.roles.collect {
+        case (role, count) if count < role.stackingBonusThresholds.min => count
       }.sum
   }
 
-  object AbsoluteRoleThresholdsSearchBackend extends SearchBackend {
-    def qualityPercentage(composition: Composition): Double = 0.0d
+  object MaxRoleThresholdsSearchBackend extends SearchBackend {
+    private val Multiplier = 1 // don't grow values because composition values already have big value diffs between them
+
+    // todo: don't count single threshold roles as imperfection
+    def qualityPercentage(composition: Composition): Double =
+      1.0d - missingRoleSlotCount(composition).toDouble / composition.roles.values.sum
 
     // distance is at least one - minimum possible distance for team would be team size
     override def distance(composition: Composition, champion: Champion): Int =
       if (composition.champions.contains(champion)) 0 // shouldn't happen
       else {
-        val thresholdCountBefore = composition.reachedThresholds.values.sum
-        val thresholdCountAfter = composition.add(champion).reachedThresholds.values.sum
-        MaxRolesPerChampion + thresholdCountAfter - thresholdCountBefore + 1
+        val unreachedThresholdCount = missingRoleSlotCount(composition.add(champion))
+        1 + unreachedThresholdCount * Multiplier
       }
 
+    // if admissible (doesn't overestimate) then the best shortest path will be found but that can be slow
     override def heuristic(composition: Composition, maxTeamSize: Int): Int = {
-      val currentThresholdCount = composition.reachedThresholds.values.sum
-      val maxThresholdCount = composition.roles.keySet.map(_.stackingBonusThresholds.max).sum
-      val thresholdScore = (maxThresholdCount - currentThresholdCount) / MaxRolesPerChampion
-      val sizeScore = maxTeamSize - composition.size
-      thresholdScore + sizeScore
+      val unreachedThresholdCount = missingRoleSlotCount(composition)
+      val distanceToDestination = maxTeamSize - composition.size
+      distanceToDestination + unreachedThresholdCount * Multiplier
     }
+
+    private def missingRoleSlotCount(composition: Composition) =
+      composition.roles.collect {
+        case (role, count) if count < role.stackingBonusThresholds.max => count
+      }.sum
   }
 
   def search(championPool: Seq[Champion],
@@ -215,8 +224,8 @@ package object domain {
               maxTeamSize: Int,
               requiredRoles: Set[Role] = Set.empty,
               requiredChampions: Set[Champion] = Set.empty): LazyList[(Composition, Double)] = {
-    val backend: SearchBackend = AnyRoleThresholdSearchBackend
-//    val backend: SearchBackend = AbsoluteRoleThresholdsSearchBackend
+    val backend: SearchBackend = MinRoleThresholdSearchBackend
+//    val backend: SearchBackend = MaxRoleThresholdsSearchBackend
 
     def satisfiesRequirements(composition: Composition): Boolean = {
       val satisfiesRoles = requiredRoles.forall(requiredRole =>
@@ -360,44 +369,6 @@ package object domain {
         case composition -> _bound => composition -> backend.qualityPercentage(composition)
       }
     }
-
-//    val aStarSearch = naiveGenericSearch((g, h) => g + h) _
-//    val greedySearch = naiveGenericSearch((g, h) => h) _
-//
-//    if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) LazyList.empty
-//    else {
-//      val initialComposition = Composition(requiredChampions)
-//
-//      val firstTeamSize = Math.max(0, maxTeamSize - 2)
-//      val firstResult: LazyList[(Composition, Int)] = greedySearch(
-//        List(initialComposition),
-//        Map(initialComposition -> 0),
-//        Map(initialComposition -> backend.heuristic(initialComposition, maxTeamSize)),
-//        firstTeamSize
-//      ).take(1)
-//
-//      val secondTeamSize = maxTeamSize
-//      val secondResult = aStarSearch(
-//        firstResult.map(_._1).toList,
-//        firstResult.toMap,
-//        firstResult.map {
-//          case (composition, _) => composition -> backend.heuristic(composition, maxTeamSize)
-//        }.toMap,
-//        secondTeamSize
-//      )
-//
-//      secondResult
-//    }
-
-//    if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) LazyList.empty
-//    else {
-//      val initialComposition = Composition(requiredChampions)
-//      greedySearch(
-//        List(initialComposition),
-//        Map(initialComposition -> 0),
-//        Map(initialComposition -> backend.heuristic(initialComposition, maxTeamSize))
-//      )
-//    }
   }
 
 }

@@ -221,10 +221,10 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
     }
   }
 
-  "AnyRoleThresholdSearchBackend" should {
+  "MinRoleThresholdSearchBackend" should {
     object Fixture {
-      val d = AnyRoleThresholdSearchBackend.distance _
-      val h = AnyRoleThresholdSearchBackend.heuristic(_, 3)
+      val d = MinRoleThresholdSearchBackend.distance _
+      val h = MinRoleThresholdSearchBackend.heuristic(_, 3)
 
       val role1 = Role("role1", Set(2))
       val role2 = Role("role2", Set(2))
@@ -267,7 +267,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
     }
 
     "heuristic should minimize number of unused role slots" in {
-      val h = AnyRoleThresholdSearchBackend.heuristic(_, 2)
+      val h = MinRoleThresholdSearchBackend.heuristic(_, 2)
 
       val role1 = Role("role1", Set(2))
       val role2 = Role("role2", Set(2))
