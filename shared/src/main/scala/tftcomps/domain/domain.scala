@@ -78,6 +78,8 @@ package object domain {
 
     @inline def size: Int = champions.size
 
+    def roleMembers(role: Role): Set[Champion] = champions.filter(_.roles.contains(role))
+
     // 0 means not reached
     def reachedThresholds: Map[Role, Int] = roles.map {
       // filter for x > 1 or Mercenary and Starship would be included in the beginning of every comp
@@ -159,32 +161,27 @@ package object domain {
   object AnyRoleThresholdSearchBackend extends SearchBackend {
     // todo: don't count single threshold roles as imperfection
     def qualityPercentage(composition: Composition): Double =
-      1.0d - composition.reachedThresholds.count(_._2 == 0).toDouble / composition.reachedThresholds.size
+      1.0d - missingRoleSlotCount(composition).toDouble / composition.champions.toSeq.map(_.roles.size).sum
 
     // distance is at least one - minimum possible distance for team would be team size
     override def distance(composition: Composition, champion: Champion): Int =
       if (composition.champions.contains(champion)) 0 // shouldn't happen
       else {
-        val unreachedThresholdCountBefore = composition.reachedThresholds.count(_._2 == 0)
-        val unreachedThresholdCountAfter = composition.add(champion).reachedThresholds.count(_._2 == 0)
-        val openThresholdCount = unreachedThresholdCountAfter - unreachedThresholdCountBefore
-        (MaxRolesPerChampion + 1) - openThresholdCount
-
-        1 + unreachedThresholdCountAfter * 10
+        val unreachedThresholdCount = missingRoleSlotCount(composition.add(champion))
+        1 + unreachedThresholdCount * 10
       }
 
     // if admissible (doesn't overestimate) then the best shortest path will be found but that can be slow
     override def heuristic(composition: Composition, maxTeamSize: Int): Int = {
-      val unreachedThresholdCount = composition.reachedThresholds.count(_._2 == 0)
-//      val distanceToDestination = (MaxRolesPerChampion + 1) * (maxTeamSize - composition.size)
+      val unreachedThresholdCount = missingRoleSlotCount(composition)
       val distanceToDestination = maxTeamSize - composition.size
-//      val fewestStepsToReachThresholds = Math.ceil(unreachedThresholdCount.toDouble / MaxRolesPerChampion).toInt
-//      val res = Math.max(distanceToDestination, fewestStepsToReachThresholds)
-////      println(
-////        s"unreachedThresholdCount=$unreachedThresholdCount distanceToDestination=$distanceToDestination fewestStepsToReachThresholds=$fewestStepsToReachThresholds res=$res")
-//      res
       distanceToDestination + unreachedThresholdCount * 10
     }
+
+    private def missingRoleSlotCount(composition: Composition) =
+      composition.reachedThresholds.collect {
+        case (role, 0) => composition.roleMembers(role).size
+      }.sum
   }
 
   object AbsoluteRoleThresholdsSearchBackend extends SearchBackend {

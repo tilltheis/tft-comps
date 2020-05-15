@@ -222,26 +222,30 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
   }
 
   "AnyRoleThresholdSearchBackend" should {
-    val d = AnyRoleThresholdSearchBackend.distance _
-    val h = AnyRoleThresholdSearchBackend.heuristic(_, 3)
+    object Fixture {
+      val d = AnyRoleThresholdSearchBackend.distance _
+      val h = AnyRoleThresholdSearchBackend.heuristic(_, 3)
 
-    val role1 = Role("role1", Set(2))
-    val role2 = Role("role2", Set(2))
-    val role3 = Role("role3", Set(2))
-    val champ1 = Champion("champ1", Set(role1), 1)
-    val champ2 = Champion("champ2", Set(role2), 1)
-    val champ3 = Champion("champ3", Set(role1), 1)
-    val champ4 = Champion("champ4", Set(role3), 1)
-    val champ5 = Champion("champ5", Set(role2), 1)
-    val comp0 = Composition(Set.empty)
-    val comp1 = Composition(Set(champ1))
-    val comp2 = Composition(Set(champ1, champ2))
-    val comp3 = Composition(Set(champ1, champ3))
-    val comp4 = Composition(Set(champ1, champ2, champ4))
-    val comp5 = Composition(Set(champ1, champ2, champ5))
+      val role1 = Role("role1", Set(2))
+      val role2 = Role("role2", Set(2))
+      val role3 = Role("role3", Set(2))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role2), 1)
+      val champ3 = Champion("champ3", Set(role1), 1)
+      val champ4 = Champion("champ4", Set(role3), 1)
+      val champ5 = Champion("champ5", Set(role2), 1)
+      val comp0 = Composition(Set.empty)
+      val comp1 = Composition(Set(champ1))
+      val comp2 = Composition(Set(champ1, champ2))
+      val comp3 = Composition(Set(champ1, champ3))
+      val comp4 = Composition(Set(champ1, champ2, champ4))
+      val comp5 = Composition(Set(champ1, champ2, champ5))
+    }
 
     // does it, though?
     "heuristic should always be smaller for bigger teams than for smaller teams " ignore {
+      import Fixture._
+
       h(comp0) should be > h(comp1)
       h(comp1) should be > h(comp2)
       h(comp1) should be > h(comp3)
@@ -251,6 +255,8 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
     }
 
     "heuristic should follow a formula" in {
+      import Fixture._
+
       // max( numberOfOpenRoles / maxRolesPerChampion, numberOfMissingChampions )
       h(comp0) should ===(3) // team size
       h(comp1) should ===(2) // team size
@@ -260,7 +266,27 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       h(comp5) should ===(0) // perfect
     }
 
+    "heuristic should minimize number of unused role slots" in {
+      val h = AnyRoleThresholdSearchBackend.heuristic(_, 2)
+
+      val role1 = Role("role1", Set(2))
+      val role2 = Role("role2", Set(2))
+      val role3 = Role("role3", Set(2))
+      val role4 = Role("role4", Set(3))
+      val champ1 = Champion("champ1", Set(role1, role2), 1)
+      val champ2 = Champion("champ2", Set(role1, role3), 1)
+      val champ3 = Champion("champ3", Set(role1, role4), 1)
+      val champ4 = Champion("champ4", Set(role1, role4), 1)
+
+      val comp1 = Composition(Set(champ1, champ2)) // 2/2, 1/2, 1/2 => 2:2
+      val comp2 = Composition(Set(champ3, champ4)) // 2/2, 2/3      => 2:2
+
+      h(comp1) should ===(h(comp2))
+    }
+
     "distance should follow a formula" in {
+      import Fixture._
+
       // 1 + open thresholds
       d(comp0, champ1) should ===(1 + 1)
       d(comp1, champ2) should ===(1 + 2)
