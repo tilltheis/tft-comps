@@ -285,9 +285,11 @@ package object domain {
     /**
       * This impl is quite fast because it follows the IDA* code.
       */
-    def genericSearch(
-        f: (Int, Int) => Int)(root: Composition, limit: Int, initialCost: Int = 0): LazyList[(Composition, Int)] = {
-      val h = backend.heuristic(_, limit)
+    def genericSearch(f: (Int, Int) => Int)(root: Composition,
+                                            maxSize: Int,
+                                            initialCost: Int = 0,
+                                            allowIncomplete: Boolean = false): LazyList[(Composition, Int)] = {
+      val h = backend.heuristic(_, maxSize)
       val d = backend.distance _
 
       /**
@@ -298,8 +300,10 @@ package object domain {
 
         if (!satisfiesRequirementsOrCompTooSmall(composition)) Left(Int.MaxValue)
         else if (fScore > bound) Left(fScore)
-        else if (composition.size == limit) // todo: think about only allowing perfect synergies
-          if (satisfiesRequirements(composition)) Right(composition -> fScore)
+        else if (composition.size == maxSize) // todo: think about only allowing perfect synergies
+          // if this produces an unfortunate incomplete result, the 2nd algo might not be able to find anything to complete the team
+          if ((allowIncomplete && satisfiesRequirementsOrCompTooSmall(composition)) ||
+              satisfiesRequirements(composition)) Right(composition -> fScore)
           else Left(Int.MaxValue)
         else
           championPool
@@ -312,16 +316,20 @@ package object domain {
             }
       }
 
-      val results = LazyList.unfold(h(root)) { bound =>
-        go(root, initialCost, bound) match {
-          case Left(Int.MaxValue)             => None
-          case Left(newBound)                 => Some((None, newBound))
-          case Right(composition -> newBound) => Some(Some((composition, newBound)), Int.MaxValue)
-        }
-      }
+      val results =
+        if (root.size >= maxSize) LazyList(Some(root -> 0))
+        else
+          LazyList.unfold(Option(h(root))) { maybeBound =>
+            maybeBound.fold[Option[(Option[(Composition, Int)], Option[Int])]](None) { bound =>
+              go(root, initialCost, bound) match {
+                case Left(Int.MaxValue)             => None
+                case Left(newBound)                 => Some((None, Some(newBound)))
+                case Right(composition -> newBound) => Some((Some((composition, newBound)), None))
+              }
+            }
+          }
 
       results.collect {
-//        case Some(composition -> _bound) => composition -> backend.imperfectness(composition)
         case Some(x) => x
       }
     }
@@ -336,7 +344,8 @@ package object domain {
       val firstResult: LazyList[(Composition, Int)] = greedySearch(
         initialComposition,
         firstTeamSize,
-        0
+        0, // initialCost
+        true // allowIncomplete
       ).take(1) // todo dont forget
 
       val secondResult = firstResult.headOption.fold(LazyList.empty[(Composition, Int)]) {
@@ -345,7 +354,8 @@ package object domain {
           nonGreedySearch(
             secondInitComp,
             secondTeamSize,
-            secondInitCost
+            secondInitCost, // initialCost
+            false // allowIncomplete
           ).map { case (composition, finalCost) => composition -> (finalCost) }
       }
 

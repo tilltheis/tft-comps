@@ -196,7 +196,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
         LazyList(Composition(Set(champ1, champ2, champ3, champ4))))
     }
 
-    "find something in the real dataset" ignore {
+    "find something in the real dataset" in {
       def compositionDescription(composition: Composition): String = {
         val rolesString =
           composition.roles.toSeq
