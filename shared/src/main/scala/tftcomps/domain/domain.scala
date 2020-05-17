@@ -165,15 +165,6 @@ package object domain {
     def empty[A: Ordering]: PriorityQueue[A] = new PriorityQueue[A](Nil)
   }
 
-  locally {
-    val role1 = Role("role1", Set(1, 2, 8))
-    val role2 = Role("role2", Set(1, 2, 8))
-    val role3 = Role("role3", Set(1, 2, 8))
-    val champs = (0 until 8).map(i => Champion(s"champ$i", Set(role1, role2, role3), 5))
-    val perfectComp = Composition(champs.toSet)
-    println("perfect comp score = " + perfectComp.score)
-  }
-
   trait SearchBackend {
     def distance(composition: Composition, champion: Champion): Int
     def heuristic(composition: Composition, maxTeamSize: Int): Int
@@ -202,142 +193,11 @@ package object domain {
 
     private def missingRoleSlotCount(composition: Composition) =
       composition.roles.collect {
-//        case (role, count) if count < role.stackingBonusThresholds.min => count * 10
         case (role, count) if count < role.stackingBonusThresholds.min =>
           (role.stackingBonusThresholds.min - count) * 10
       }.sum
   }
 
-  object MaxRoleThresholdsSearchBackend extends SearchBackend {
-    // todo: don't count single threshold roles as imperfection
-    def qualityPercentage(composition: Composition): Double =
-      1.0d - missingRoleSlotCount(composition).toDouble / composition.roles.values.sum
-
-    // distance is at least one - minimum possible distance for team would be team size
-    override def distance(composition: Composition, champion: Champion): Int =
-      if (composition.champions.contains(champion)) 0 // shouldn't happen
-      else {
-        val unreachedThresholdCount = missingRoleSlotCount(composition.add(champion))
-        1 + unreachedThresholdCount
-      }
-
-    // if admissible (doesn't overestimate) then the best shortest path will be found but that can be slow
-    override def heuristic(composition: Composition, maxTeamSize: Int): Int = {
-      val unreachedThresholdCount = missingRoleSlotCount(composition)
-      val distanceToDestination = maxTeamSize - composition.size
-      distanceToDestination + unreachedThresholdCount
-    }
-
-    private def missingRoleSlotCount(composition: Composition) =
-      composition.roles.collect {
-        // this favors roles w/ low thresholds
-        // there is also no progress indicator. stacking the role will actually yield a worse score until it's full
-        //        case (role, count) if count < role.stackingBonusThresholds.max => count
-
-        //this favors roles w/ low thresholds
-        //        case (role, count) => role.stackingBonusThresholds.max - count
-
-        // this kinda works but is slow and still favors roles w/ low thresholds
-        //        case (role, count) =>
-        //          (12 - indexPlus1 * (12 / role.stackingBonusThresholds.size)) -
-        //            (count - composition.reachedThresholds(role))
-
-        // this is good but ignores thresholds (produces eg 5 sorcs instead of the 6 threshold)
-        //case (role, count) => MaxThreshold - count
-
-        // this kinda works but is super slow and only really finds sorcs
-        //        case (role, count) =>
-        //          (MaxThreshold - count) * (role.stackingBonusThresholds.size - composition.reachedThresholdIndex(role, count))
-
-        case (role, count) =>
-          if (role.sortedThresholdsArray.length == 1) 0
-          else
-            role.sortedThresholdsArray.zip(role.sortedThresholdsArray.tail).zipWithIndex.foldLeft(0) {
-              case (sum, ((thresholdFrom, thresholdTo), index)) =>
-                if (count >= thresholdTo) sum
-                else if (count >= thresholdFrom && count < thresholdTo) sum + (thresholdTo - count) * index
-                else sum + (thresholdTo - thresholdFrom) * index
-            }
-      }.sum
-  }
-
-  object RelativeMaxRoleThresholdsSearchBackend extends SearchBackend {
-    def qualityPercentage(composition: Composition): Double =
-      1.0d - missingRoleSlotCount(composition).toDouble / composition.roles.values.sum
-
-    // distance is at least one - minimum possible distance for team would be team size
-    override def distance(composition: Composition, champion: Champion): Int =
-      if (composition.champions.contains(champion)) 0 // shouldn't happen
-      else {
-        val unreachedThresholdCount = missingRoleSlotCount(composition.add(champion))
-        (1 + unreachedThresholdCount)
-      }
-
-    // if admissible (doesn't overestimate) then the best shortest path will be found but that can be slow
-    override def heuristic(composition: Composition, maxTeamSize: Int): Int = {
-      val unreachedThresholdCount = missingRoleSlotCount(composition)
-      val distanceToDestination = maxTeamSize - composition.size
-      (distanceToDestination + unreachedThresholdCount)
-    }
-
-    private def missingRoleSlotCount__(composition: Composition): Int = {
-      composition.roles.map {
-        case (role, count) =>
-          var inLoop = true
-          var i = role.sortedThresholdsArray.length - 1
-          var reachedIndex = 0
-          while (inLoop) {
-            //            if (i == role.sortedThresholdsArray.length || role.sortedThresholdsArray(i) > count) { // original
-            if (role.sortedThresholdsArray(i) <= count) {
-              reachedIndex = i
-              inLoop = false
-            }
-            i -= 1
-          }
-          (12 - (reachedIndex + 1) * (12 / role.stackingBonusThresholds.size)) +
-            (if (count < role.stackingBonusThresholds.min) count * 10 else 0)
-        //          if (count < role.stackingBonusThresholds.min) count * 10
-        //          else 12 - (reachedIndex + 1) * (12 / role.stackingBonusThresholds.size)
-      }.sum
-    }
-
-    // from backup
-    private def missingRoleSlotCount_(composition: Composition): Int = {
-      composition.roles.map {
-        case (role, count) =>
-          var inLoop = true
-          var i = 0
-          var reachedIndex = 0
-          while (inLoop) {
-            if (i == role.sortedThresholdsArray.length || role.sortedThresholdsArray(i) > count) {
-              reachedIndex = i - 1
-              inLoop = false
-            }
-            i += 1
-          }
-          println(s"$reachedIndex for ($role, $count) in $composition")
-          (12 - (reachedIndex + 1) * (12 / role.stackingBonusThresholds.size)) +
-            (if (count < role.stackingBonusThresholds.min) count * 10 else 0)
-        //          if (count < role.stackingBonusThresholds.min) count * 10
-        //          else 12 - (reachedIndex + 1) * (12 / role.stackingBonusThresholds.size)
-      }.sum
-    }
-
-    // this is the good one!
-    private def missingRoleSlotCount(composition: Composition): Int =
-      composition.roles.map {
-        case (role, count) =>
-          // this counts diff to max stack for each role
-          // the old scorer simply gave a boost for a big stack
-          // how can we reproduce that?
-          count * (12 - (composition.reachedThresholdIndex(role, count) + 1) * (12 / role.stackingBonusThresholds.size)) +
-            //          count * (role.sortedThresholdsArray.last - count) +
-            (if (count < role.stackingBonusThresholds.min) count * 120 else 0)
-      }.sum
-  }
-
-  // idea: require users to specify the role level. then we can pre-fill the search with champions and do a MinRoleThreshold
-  // search from there.
   def search(championPool: Seq[Champion],
              maxTeamSize: Int,
              requiredRoles: Set[Role] = Set.empty,
@@ -358,8 +218,6 @@ package object domain {
               requiredRoleCounts: Map[Role, Int] = Map.empty,
               requiredChampions: Set[Champion] = Set.empty): LazyList[(Composition, Double)] = {
     val backend: SearchBackend = MinRoleThresholdSearchBackend
-    //    val backend: SearchBackend = MaxRoleThresholdsSearchBackend
-    //    val backend: SearchBackend = RelativeMaxRoleThresholdsSearchBackend
 
     val requiredRoles = requiredRoleCounts.filter(_._2 > 0)
 
@@ -367,23 +225,26 @@ package object domain {
       val satisfiesRoles = requiredRoles.forall {
         case (requiredRole, requiredCount) =>
           composition.roles.exists {
-            case (`requiredRole`, count) if count >= requiredCount => true
-            case _                                                 => false
+            case (role, count) => role == requiredRole && count >= requiredCount
           }
       }
-      val satisfiesChampions = requiredChampions.forall(composition.champions.contains)
+      val satisfiesChampions = requiredChampions.subsetOf(composition.champions)
 
       satisfiesRoles && satisfiesChampions
     }
 
-    def satisfiesRequirementsOrCompTooSmall(composition: Composition): Boolean = {
-      val championsLackingRequiredRoles = composition.champions.filterNot(_.roles.exists(requiredRoles.contains))
-      satisfiesRequirements(composition) || championsLackingRequiredRoles.isEmpty ||
-      championsLackingRequiredRoles.forall(requiredChampions.contains)
+    def relevantChampionPool(composition: Composition): Seq[Champion] = {
+      val championsForRequiredRoles = requiredRoles.flatMap {
+        case (role, count) =>
+          if (composition.roles.getOrElse(role, 0) < count) championPool.filter(_.roles.contains(role))
+          else Seq.empty
+      }
+      // we cannot use `Set`s here because the champion pool order matters (it influences result order)
+      val requiredPool =
+        (requiredChampions.toSeq ++ championsForRequiredRoles).distinct.filterNot(composition.champions.contains)
+      val globalPool = championPool.filterNot(composition.champions.contains)
+      if (requiredPool.nonEmpty) requiredPool else globalPool
     }
-
-    // idea: always initialize with role (loop), best first search for teamsize-2 and a* for last 1 or 2 levels
-    // idea: seed search with 1 or 2 role (maybe using Set#subsets for variation, eg (0 until 9).toSet.subsets(3).size * 23 = 1932)
 
     /**
       * This impl is quite fast because it follows the IDA* code.
@@ -401,18 +262,13 @@ package object domain {
       def go(composition: Composition, gScore: Int, bound: Int): Either[Int, (Composition, Int)] = {
         val fScore = f(gScore, h(composition))
 
-        if (!satisfiesRequirementsOrCompTooSmall(composition)) Left(Int.MaxValue)
-        else if (fScore > bound) Left(fScore)
-        else if (composition.size == maxSize) // todo: think about only allowing perfect synergies
-          // if this produces an unfortunate incomplete result, the 2nd algo might not be able to find anything to complete the team
-          if ((allowIncomplete && satisfiesRequirementsOrCompTooSmall(composition)) ||
-              satisfiesRequirements(composition)) Right(composition -> gScore)
+        if (fScore > bound) Left(fScore)
+        else if (composition.size == maxSize)
+          // the requirements might not be satisfiable
+          if (allowIncomplete || satisfiesRequirements(composition)) Right(composition -> gScore)
           else Left(Int.MaxValue)
         else
-          championPool
-          // todo: extend this to only provide values that satisfy requirements
-          // instead of having `allowIncomplete` and `satisfiesRequirements` and friends
-            .filterNot(composition.champions.contains)
+          relevantChampionPool(composition)
             .foldLeft[Either[Int, (Composition, Int)]](Left(Int.MaxValue)) {
               case (x @ Right(_), _) => x
               case (Left(tmpMin), champion) =>
@@ -445,7 +301,7 @@ package object domain {
     else {
       val initialComposition = Composition(requiredChampions)
       val firstTeamSize = Math.max(0, maxTeamSize - 2)
-      val firstResult: LazyList[(Composition, Int)] = greedySearch(
+      val firstResult = greedySearch(
         initialComposition,
         firstTeamSize,
         0, // initialCost
