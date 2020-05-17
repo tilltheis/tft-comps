@@ -94,7 +94,7 @@ package object domain {
 
     // -1 means not reached
     @inline def reachedThresholdIndex(role: Role, count: Int): Int = {
-//      // this will be called often
+      //      // this will be called often
       var inLoop = true
       var i = role.sortedThresholdsArray.length - 1
       var reachedIndex = -1
@@ -119,7 +119,7 @@ package object domain {
         roles.map {
           case (role, count) =>
             // filter for x > 1 or Mercenary and Starship would be included in the beginning of every comp
-//            val multiplier = role.stackingBonusThresholds.filter(x => x > 1 && x <= count).maxOption.fold(0) {
+            //            val multiplier = role.stackingBonusThresholds.filter(x => x > 1 && x <= count).maxOption.fold(0) {
             val multiplier = role.stackingBonusThresholds.filter(x => x > 1 && x <= count).maxOption.fold(0) {
               reachedThreshold =>
                 val thresholdIndex = role.stackingBonusThresholds.toSeq.sorted.indexOf(reachedThreshold)
@@ -127,12 +127,12 @@ package object domain {
                 1 + thresholdIndex + 1 // this favors roles with many thresholds
                 4 * (Math.min(2, thresholdIndex) + 1) + (thresholdIndex + 1) * (12 / role.stackingBonusThresholds.size) // big synergy groups are great but fully stacked ones as well (max 2 to counter sorcerer w/ 4 thresholds) (add 50% or 100% max points for full stacks)
                 (thresholdIndex + 1) * 12
-//                12 // simply count if threshold is reached or not
-//                1
+                //                12 // simply count if threshold is reached or not
+                //                1
                 reachedThreshold
             }
             multiplier
-//            count * multiplier
+          //            count * multiplier
         }.sum + size.toInt + (3 * size.toInt - roles.size.toInt) // boost simple comps w/ few roles
 
     def synergies: Map[Role, Int] =
@@ -202,7 +202,9 @@ package object domain {
 
     private def missingRoleSlotCount(composition: Composition) =
       composition.roles.collect {
-        case (role, count) if count < role.stackingBonusThresholds.min => count * 10
+//        case (role, count) if count < role.stackingBonusThresholds.min => count * 10
+        case (role, count) if count < role.stackingBonusThresholds.min =>
+          (role.stackingBonusThresholds.min - count) * 10
       }.sum
   }
 
@@ -230,22 +232,22 @@ package object domain {
       composition.roles.collect {
         // this favors roles w/ low thresholds
         // there is also no progress indicator. stacking the role will actually yield a worse score until it's full
-//        case (role, count) if count < role.stackingBonusThresholds.max => count
+        //        case (role, count) if count < role.stackingBonusThresholds.max => count
 
         //this favors roles w/ low thresholds
-//        case (role, count) => role.stackingBonusThresholds.max - count
+        //        case (role, count) => role.stackingBonusThresholds.max - count
 
         // this kinda works but is slow and still favors roles w/ low thresholds
-//        case (role, count) =>
-//          (12 - indexPlus1 * (12 / role.stackingBonusThresholds.size)) -
-//            (count - composition.reachedThresholds(role))
+        //        case (role, count) =>
+        //          (12 - indexPlus1 * (12 / role.stackingBonusThresholds.size)) -
+        //            (count - composition.reachedThresholds(role))
 
         // this is good but ignores thresholds (produces eg 5 sorcs instead of the 6 threshold)
         //case (role, count) => MaxThreshold - count
 
         // this kinda works but is super slow and only really finds sorcs
-//        case (role, count) =>
-//          (MaxThreshold - count) * (role.stackingBonusThresholds.size - composition.reachedThresholdIndex(role, count))
+        //        case (role, count) =>
+        //          (MaxThreshold - count) * (role.stackingBonusThresholds.size - composition.reachedThresholdIndex(role, count))
 
         case (role, count) =>
           if (role.sortedThresholdsArray.length == 1) 0
@@ -285,7 +287,7 @@ package object domain {
           var i = role.sortedThresholdsArray.length - 1
           var reachedIndex = 0
           while (inLoop) {
-//            if (i == role.sortedThresholdsArray.length || role.sortedThresholdsArray(i) > count) { // original
+            //            if (i == role.sortedThresholdsArray.length || role.sortedThresholdsArray(i) > count) { // original
             if (role.sortedThresholdsArray(i) <= count) {
               reachedIndex = i
               inLoop = false
@@ -329,7 +331,7 @@ package object domain {
           // the old scorer simply gave a boost for a big stack
           // how can we reproduce that?
           count * (12 - (composition.reachedThresholdIndex(role, count) + 1) * (12 / role.stackingBonusThresholds.size)) +
-//          count * (role.sortedThresholdsArray.last - count) +
+            //          count * (role.sortedThresholdsArray.last - count) +
             (if (count < role.stackingBonusThresholds.min) count * 120 else 0)
       }.sum
   }
@@ -340,22 +342,35 @@ package object domain {
              maxTeamSize: Int,
              requiredRoles: Set[Role] = Set.empty,
              requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] =
+    search2(championPool,
+            maxTeamSize,
+            requiredRoles.map(r => r -> r.stackingBonusThresholds.min).toMap,
+            requiredChampions).map(_._1)
+
+  def searchWithDetailedRoles(championPool: Seq[Champion],
+                              maxTeamSize: Int,
+                              requiredRoles: Map[Role, Int] = Map.empty,
+                              requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] =
     search2(championPool, maxTeamSize, requiredRoles, requiredChampions).map(_._1)
 
   def search2(championPool: Seq[Champion],
               maxTeamSize: Int,
-              requiredRoles: Set[Role] = Set.empty,
+              requiredRoleCounts: Map[Role, Int] = Map.empty,
               requiredChampions: Set[Champion] = Set.empty): LazyList[(Composition, Double)] = {
-//    val backend: SearchBackend = MinRoleThresholdSearchBackend
-    val backend: SearchBackend = MaxRoleThresholdsSearchBackend
-//    val backend: SearchBackend = RelativeMaxRoleThresholdsSearchBackend
+    val backend: SearchBackend = MinRoleThresholdSearchBackend
+    //    val backend: SearchBackend = MaxRoleThresholdsSearchBackend
+    //    val backend: SearchBackend = RelativeMaxRoleThresholdsSearchBackend
+
+    val requiredRoles = requiredRoleCounts.filter(_._2 > 0)
 
     def satisfiesRequirements(composition: Composition): Boolean = {
-      val satisfiesRoles = requiredRoles.forall(requiredRole =>
-        composition.roles.exists {
-          case (`requiredRole`, count) if count >= requiredRole.stackingBonusThresholds.min => true
-          case _                                                                            => false
-      })
+      val satisfiesRoles = requiredRoles.forall {
+        case (requiredRole, requiredCount) =>
+          composition.roles.exists {
+            case (`requiredRole`, count) if count >= requiredCount => true
+            case _                                                 => false
+          }
+      }
       val satisfiesChampions = requiredChampions.forall(composition.champions.contains)
 
       satisfiesRoles && satisfiesChampions
@@ -363,60 +378,12 @@ package object domain {
 
     def satisfiesRequirementsOrCompTooSmall(composition: Composition): Boolean = {
       val championsLackingRequiredRoles = composition.champions.filterNot(_.roles.exists(requiredRoles.contains))
-      satisfiesRequirements(composition) || championsLackingRequiredRoles.isEmpty || championsLackingRequiredRoles
-        .forall(requiredChampions.contains)
+      satisfiesRequirements(composition) || championsLackingRequiredRoles.isEmpty ||
+      championsLackingRequiredRoles.forall(requiredChampions.contains)
     }
 
     // idea: always initialize with role (loop), best first search for teamsize-2 and a* for last 1 or 2 levels
     // idea: seed search with 1 or 2 role (maybe using Set#subsets for variation, eg (0 until 9).toSet.subsets(3).size * 23 = 1932)
-
-    /**
-      * This impl is super slow but follows the textbook A* code.
-      *
-      * @param fScore (g, h) => f
-      *               - use only g => uniform-cost search
-      *               - use only h => greedy best-first search
-      *               - use both g and h => A* search
-      * @return pairs of composition and their fScore
-      */
-    def genericAStar(fScore: (Int, Int) => Int)(root: Composition,
-                                                maxSize: Int,
-                                                initialCost: Int = 0,
-                                                allowIncomplete: Boolean = false): LazyList[(Composition, Int)] = {
-      val h = backend.heuristic(_, maxSize)
-      val d = backend.distance _
-
-      def go(openSet: List[Composition],
-             g: Map[Composition, Int],
-             f: Map[Composition, Int]): LazyList[(Composition, Int)] = {
-        val sortedVisited = openSet.sortBy(f)
-        sortedVisited match {
-          case Nil => LazyList.empty[(Composition, Int)]
-          case composition :: newOpenSet =>
-            if (composition.size == maxSize)
-              if ((allowIncomplete && satisfiesRequirementsOrCompTooSmall(composition)) ||
-                  satisfiesRequirements(composition))
-                (composition, g(composition)) #:: go(newOpenSet, g, f)
-              else go(newOpenSet, g, f)
-            else {
-              val newArgs = championPool.foldLeft((newOpenSet, g, f)) {
-                case (tmp @ (tmpVisited, tmpG, tmpF), champion) =>
-                  val tmpComposition = composition.add(champion)
-                  val tmpGScore = tmpG(composition) + d(composition, champion)
-                  if (tmpGScore < tmpG.getOrElse(tmpComposition, Int.MaxValue) && satisfiesRequirementsOrCompTooSmall(
-                        tmpComposition)) {
-                    (tmpComposition :: tmpVisited,
-                     tmpG + (tmpComposition -> tmpGScore),
-                     tmpF + (tmpComposition -> fScore(tmpGScore, h(tmpComposition))))
-                  } else tmp
-              }
-              (go _).tupled(newArgs)
-            }
-        }
-      }
-
-      go(List(root), Map(root -> initialCost), Map(root -> fScore(initialCost, h(root))))
-    }
 
     /**
       * This impl is quite fast because it follows the IDA* code.
@@ -443,6 +410,8 @@ package object domain {
           else Left(Int.MaxValue)
         else
           championPool
+          // todo: extend this to only provide values that satisfy requirements
+          // instead of having `allowIncomplete` and `satisfiesRequirements` and friends
             .filterNot(composition.champions.contains)
             .foldLeft[Either[Int, (Composition, Int)]](Left(Int.MaxValue)) {
               case (x @ Right(_), _) => x
@@ -472,13 +441,10 @@ package object domain {
     val nonGreedySearch = genericIdaStar((g, h) => g + h) _
     val greedySearch = genericIdaStar((g, h) => h) _
 
-//    val nonGreedySearch = genericAStar((g, h) => g + h) _
-//    val greedySearch = genericAStar((g, h) => h) _
-
     if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) LazyList.empty
     else {
       val initialComposition = Composition(requiredChampions)
-      val firstTeamSize = Math.max(0, maxTeamSize - 0)
+      val firstTeamSize = Math.max(0, maxTeamSize - 2)
       val firstResult: LazyList[(Composition, Int)] = greedySearch(
         initialComposition,
         firstTeamSize,

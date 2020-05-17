@@ -2,6 +2,7 @@ package tftcomps.application
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, ScalaFnComponent}
+import tftcomps.domain.Role
 
 object CompositionForm {
   final case class Props(compositionConfig: CompositionConfig, onCompositionConfigChange: CompositionConfig => Callback)
@@ -13,7 +14,8 @@ object CompositionForm {
       ^.alignItems := "center",
       <.div(^.width := 10.rem, s"$title:"),
       <.input(
-        ^.width := 10.rem,
+        ^.width := 9.rem,
+        ^.marginRight := 1.rem,
         ^.`type` := "range",
         ^.min := possibleValues.min,
         ^.max := possibleValues.max,
@@ -49,12 +51,49 @@ object CompositionForm {
       )
     )
 
+    def requiredRolesField(title: String, values: Map[Role, Int])(onChange: Map[Role, Int] => Callback) = <.div(
+      ^.marginBottom := 0.5.rem,
+      ^.display := "flex",
+      <.div(^.width := 10.rem, s"$title:"),
+      <.div(
+        ^.columnWidth := 9.rem,
+        ^.columnCount := "9",
+        ^.columnGap := 1.rem,
+        values.toSeq
+          .sortBy(_._1.name)
+          .toTagMod {
+            case (role, count) =>
+              <.div(
+                ^.pageBreakInside := "avoid",
+                ^.marginBottom := 0.5.rem,
+                <.label(
+                  ^.display := "block",
+                  <.div(s"$count/${role.stackingBonusThresholds.max} ${role.name}"),
+                  <.input(
+                    ^.margin := 0.rem,
+                    ^.width := "100%",
+                    ^.display := "block",
+                    ^.`type` := "range",
+                    ^.min := 0,
+                    ^.max := role.stackingBonusThresholds.max,
+                    ^.step := role.stackingBonusThresholds.tail.headOption
+                      .map(_ - role.stackingBonusThresholds.head)
+                      .getOrElse(role.stackingBonusThresholds.last),
+                    ^.value := count,
+                    ^.onChange ==> ((e: ReactEventFromInput) => onChange(values.updated(role, e.target.value.toInt)))
+                  )
+                )
+              )
+          }
+      )
+    )
+
     <.div(
       numberSlider("Max Team Size", 1 to 10, props.compositionConfig.maxTeamSize)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(maxTeamSize = x))),
       numberSlider("Max Champion Cost", 1 to 5, props.compositionConfig.maxChampionCost)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(maxChampionCost = x))),
-      checkboxSet("Required Roles", tftcomps.domain.data.roles.all, props.compositionConfig.requiredRoles)(_.name)(x =>
+      requiredRolesField("Required Traits", props.compositionConfig.requiredRoles)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(requiredRoles = x))),
       checkboxSet("Required Champions", tftcomps.domain.data.champions.all, props.compositionConfig.requiredChampions)(
         _.name)(x => props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),

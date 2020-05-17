@@ -48,6 +48,7 @@ object CompositionGenerator {
 
     def handleCompositionConfigChange(newCompositionConfig: CompositionConfig): Callback = {
       val newCompositions = findCompositions(newCompositionConfig)
+//      val newCompositions = LazyList.empty
       val newState =
         State(compositionConfig = newCompositionConfig, compositions = newCompositions, compositionRenderLimit = 0)
       $.setState(newState) >> startPullingCompositions(newCompositions)
@@ -71,7 +72,7 @@ object CompositionGenerator {
       .initialState(State(
         CompositionConfig(maxTeamSize = 8,
                           maxChampionCost = 5,
-                          requiredRoles = Set.empty,
+                          requiredRoles = data.roles.all.map(_ -> 0).toMap,
                           requiredChampions = Set.empty),
         compositions = LazyList.empty,
         compositionRenderLimit = 0
