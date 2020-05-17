@@ -210,8 +210,8 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       println("total result count = " + result.toVector.size)
       println(
         result
-//          .take(250)
-        .toVector
+          .take(10)
+          .toVector
           .map {
             case (composition, length) =>
               s"length=$length size=${composition.size} ${compositionDescription(composition)}"
@@ -293,6 +293,29 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       d(comp1, champ3) should ===(1)
       d(comp2, champ4) should ===(1 + 3)
       d(comp2, champ5) should ===(1 + 1)
+    }
+  }
+
+  "RelativeMaxRoleThresholdsSearchBackend" should {
+    "something" in {
+      val h = RelativeMaxRoleThresholdsSearchBackend.heuristic(_, 2)
+
+      val role1 = Role("role1", Set(2))
+      val role2 = Role("role2", Set(2))
+      val role3 = Role("role3", Set(2))
+      val role4 = Role("role4", Set(3))
+      val champ1 = Champion("champ1", Set(role1, role2), 1)
+      val champ2 = Champion("champ2", Set(role1, role3), 1)
+      val champ3 = Champion("champ3", Set(role1, role4), 1)
+      val champ4 = Champion("champ4", Set(role1, role4), 1)
+
+      val comp1 = Composition(Set(champ1, champ2)) // 2/2, 1/2, 1/2 => 2:2
+      val comp2 = Composition(Set(champ3, champ4)) // 2/2, 2/3      => 2:2
+
+      println(h(comp1))
+      println(h(comp2))
+
+      h(comp1) should ===(h(comp2))
     }
   }
 }

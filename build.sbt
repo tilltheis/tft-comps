@@ -23,4 +23,6 @@ lazy val tftcomps = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "1.7.0",
     npmDependencies in Compile ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1"),
   )
-  .enablePlugins(ScalaJSBundlerPlugin)
+
+// this won't be used directly but this ensures that only the JS part and not the shared part is actually run via node
+lazy val js = tftcomps.js.enablePlugins(ScalaJSBundlerPlugin)
