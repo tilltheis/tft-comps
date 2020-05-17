@@ -11,12 +11,12 @@ object ChampionComposition {
   val Component = ScalaFnComponent[Props] { props =>
     <.div(
       ^.display := "flex",
-      <.h3(^.width := 10.rem, s"${(props.quality * 100).toInt}%", <.small(" quality")),
+      <.h3(^.width := 10.rem, s"${(props.composition.synergyPercentage * 100).toInt}%", <.small(" synergy")),
       <.ol(
         ^.listStyle := "none",
         ^.paddingLeft := 0.rem,
         ^.width := 10.rem,
-        props.composition.roles.toSeq
+        props.composition.roleCounts.toSeq
           .sortBy {
             case (role, count) =>
               // 1. role stack percentage, 2. count, 3. name

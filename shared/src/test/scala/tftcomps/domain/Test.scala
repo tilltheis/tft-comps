@@ -8,6 +8,15 @@ import scala.util.Random
 
 class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
   "search" should {
+    def searchWithMinRoleThresholds(championPool: Seq[Champion],
+                                    maxTeamSize: Int,
+                                    requiredRoles: Set[Role] = Set.empty,
+                                    requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] =
+      search(championPool,
+             maxTeamSize,
+             requiredRoles.map(r => r -> r.stackingBonusThresholds.min).toMap,
+             requiredChampions)
+
     "find the best composition (more or less)" in {
       val role1 = Role("role1", Set(2))
       val role2 = Role("role2", Set(2))
@@ -19,12 +28,12 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role2, role4), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      search(allChampions, 2).head should {
+      searchWithMinRoleThresholds(allChampions, 2).head should {
         equal(Composition(Set(champ1, champ2))) or
           equal(Composition(Set(champ1, champ4)))
       }
 
-      search(allChampions, 3).head should ===(Composition(Set(champ1, champ2, champ4)))
+      searchWithMinRoleThresholds(allChampions, 3).head should ===(Composition(Set(champ1, champ2, champ4)))
     }
 
     "be possible around a required set of champions" in {
@@ -35,7 +44,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      val result = search(allChampions, 3, requiredChampions = Set(champ1, champ2))
+      val result = searchWithMinRoleThresholds(allChampions, 3, requiredChampions = Set(champ1, champ2))
       result should not be empty
       result.head should {
         equal(Composition(Set(champ1, champ2, champ3))) or
@@ -51,7 +60,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      search(allChampions, 1, requiredChampions = Set(champ1, champ2)) should ===(LazyList.empty)
+      searchWithMinRoleThresholds(allChampions, 1, requiredChampions = Set(champ1, champ2)) should ===(LazyList.empty)
     }
 
     "be possible around a required set of roles" in {
@@ -66,13 +75,13 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ6 = Champion("champ6", Set(role3), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4, champ5, champ6)
 
-      val result1 = search(allChampions, 3, requiredRoles = Set(role1, role2))
+      val result1 = searchWithMinRoleThresholds(allChampions, 3, requiredRoles = Set(role1, role2))
       result1 should not be empty
-      result1.head.roles.keySet should contain allElementsOf (Set(role1, role2))
+      result1.head.roleCounts.keySet should contain allElementsOf (Set(role1, role2))
 
-      val result2 = search(allChampions, 2, requiredRoles = Set(role3))
+      val result2 = searchWithMinRoleThresholds(allChampions, 2, requiredRoles = Set(role3))
       result2 should not be empty
-      result2.head.roles.keySet should contain allElementsOf (Set(role3))
+      result2.head.roleCounts.keySet should contain allElementsOf (Set(role3))
     }
 
     "be possible around a required set of roles, including zeros" in {
@@ -89,7 +98,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val allChampions = Seq(champ1, champ2, champ3, champ4, champ5, champ6)
 
       val result1 =
-        searchWithDetailedRoles(allChampions, 3, requiredRoles = allRoles.map(_ -> 0).toMap.updated(role2, 3))
+        search(allChampions, 3, requiredRoleCounts = allRoles.map(_ -> 0).toMap.updated(role2, 3))
       result1 should not be empty
       result1.head should ===(Composition(Set(champ2, champ4, champ5)))
     }
@@ -103,7 +112,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      search(allChampions, 1, requiredRoles = Set(role1, role2)) should ===(LazyList.empty)
+      searchWithMinRoleThresholds(allChampions, 1, requiredRoles = Set(role1, role2)) should ===(LazyList.empty)
     }
 
     "find nothing when the number of required roles cannot be satisfied because the count threshold cannot be reached" in {
@@ -113,7 +122,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ3 = Champion("champ3", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3)
 
-      search(allChampions, 2, requiredRoles = Set(role1)) should ===(LazyList.empty)
+      searchWithMinRoleThresholds(allChampions, 2, requiredRoles = Set(role1)) should ===(LazyList.empty)
     }
 
     "find something when role and champion requirements don't overlap but can be fulifilled" in {
@@ -127,36 +136,16 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ5 = Champion("champ5", Set(role3), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4, champ5)
 
-      search(allChampions, 4, requiredRoles = Set(role1), requiredChampions = Set(champ4)) should ===(
+      searchWithMinRoleThresholds(allChampions, 4, requiredRoles = Set(role1), requiredChampions = Set(champ4)) should ===(
         LazyList(Composition(Set(champ1, champ2, champ3, champ4))))
     }
 
     "find 6 cyber, 2 infil in real dataset" in {
-      search2(data.champions.all.toSeq, 8, Map(data.roles.Cybernetic -> 6, data.roles.Infiltrator -> 2)) should not be empty
+      search(data.champions.all.toSeq, 8, Map(data.roles.Cybernetic -> 6, data.roles.Infiltrator -> 2)) should not be empty
     }
 
     "find something in the real dataset" in {
-      def compositionDescription(composition: Composition): String = {
-        val rolesString =
-          composition.roles.toSeq
-            .sortBy { case (role, count) => (-count, role.name) }
-            .map { case (role, count) => s"$count ${role.name}" }
-            .mkString(", ")
-        val champsString = composition.champions.map(_.name).toSeq.sorted.mkString(", ")
-        s"[${composition.score}] (${composition.roles.size}) $rolesString ($champsString)"
-      }
-      val result = search2(Random.shuffle(data.champions.all.toSeq), 8)
-      println("total result count = " + result.toVector.size)
-      println(
-        result
-          .take(10)
-          .toVector
-          .map {
-            case (composition, length) =>
-              s"length=$length size=${composition.size} ${compositionDescription(composition)}"
-          }
-          .mkString("\n"))
-      result.take(1).toVector should not be empty
+      search(Random.shuffle(data.champions.all.toSeq), 8) should not be empty
     }
 
   }
