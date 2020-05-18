@@ -8,6 +8,16 @@ import tftcomps.domain.{Composition, CompositionConfig, data}
 
 object CompositionGenerator {
   final case class State(compositionConfig: CompositionConfig, compositions: Seq[Composition], worker: Option[Worker])
+  object State {
+    val empty: State = State(
+      CompositionConfig(maxTeamSize = 8,
+                        maxChampionCost = 5,
+                        requiredRoles = data.roles.all.map(_ -> 0).toMap,
+                        requiredChampions = Set.empty),
+      Seq.empty,
+      None
+    )
+  }
 
   final case class Backend($ : BackendScope[Unit, State]) {
     def handleCompositionConfigChange(newCompositionConfig: CompositionConfig): Callback = {
@@ -20,12 +30,14 @@ object CompositionGenerator {
         val worker = new Worker("../../../../webworker/target/scala-2.13/tft-comps-webworker-fastopt.js")
         worker.onmessage = { (event: MessageEvent) =>
           val composition = decode[Composition](event.data.asInstanceOf[String]).toTry.get
-          $.modState(s => s.copy(compositions = s.compositions :+ composition)).runNow()
+          $.modState(s =>
+            s.copy(compositions = (s.compositions :+ composition).distinct.sortBy(-_.synergyPercentage).take(50)))
+            .runNow()
         }
         worker
       }
       def setNewState(worker: Worker) =
-        $.setState(State(compositionConfig = newCompositionConfig, compositions = Seq.empty, worker = Some(worker)))
+        $.setState(State.empty.copy(compositionConfig = newCompositionConfig, worker = Some(worker)))
       def startWorker(worker: Worker) = Callback(worker.postMessage(newCompositionConfig.asJson.noSpaces))
       terminateWorker >> (spawnWorker >>= (w => setNewState(w) >> startWorker(w)))
     }
@@ -34,10 +46,7 @@ object CompositionGenerator {
       <.div(
         <.h1("TFT Team Composition Generator"),
         CompositionForm(state.compositionConfig, handleCompositionConfigChange),
-        CompositionResults(
-          state.compositions
-//            .distinctBy(_.champions.map(_.name).mkString) // this shouldn't be necessary but `.toSet` yields duplicates
-          .toSet)
+        CompositionResults(state.compositions)
       )
     }
   }
@@ -45,13 +54,7 @@ object CompositionGenerator {
   val Component =
     ScalaComponent
       .builder[Unit]("Composition Generator")
-      .initialState(
-        State(CompositionConfig(maxTeamSize = 8,
-                                maxChampionCost = 5,
-                                requiredRoles = data.roles.all.map(_ -> 0).toMap,
-                                requiredChampions = Set.empty),
-              LazyList.empty,
-              None))
+      .initialState(State.empty)
       .renderBackend[Backend]
       .componentDidMount(mounted => mounted.backend.handleCompositionConfigChange(mounted.state.compositionConfig))
       .build

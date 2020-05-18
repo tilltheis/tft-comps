@@ -13,15 +13,16 @@ object Main extends App {
     val compositionConfig = decode[CompositionConfig](event.data.asInstanceOf[String]).toTry.get
 
     // We cannot search the entire tree. It's too big. Therefore try several times w/ shuffled inputs.
-    val results = LazyList(0 until 500: _*).flatMap { _ =>
-      search(
+    def go(times: Int): Unit = if (times > 0) {
+      val maybeComposition = search(
         Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
         compositionConfig.maxTeamSize,
         compositionConfig.requiredRoles,
         compositionConfig.requiredChampions
-      ).take(1)
+      )
+      maybeComposition.foreach(composition => scalajs.js.Dynamic.global.postMessage(composition.asJson.noSpaces))
+      scalajs.js.timers.setTimeout(0)(go(times - 1)) // give the computer time to breath
     }
-
-    results.foreach(result => scalajs.js.Dynamic.global.postMessage(result.asJson.noSpaces))
+    go(500)
   }
 }
