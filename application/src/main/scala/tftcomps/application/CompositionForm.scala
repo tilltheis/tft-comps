@@ -2,7 +2,7 @@ package tftcomps.application
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, ScalaFnComponent}
-import tftcomps.domain.Role
+import tftcomps.domain.{CompositionConfig, Role}
 
 object CompositionForm {
   final case class Props(compositionConfig: CompositionConfig, onCompositionConfigChange: CompositionConfig => Callback)

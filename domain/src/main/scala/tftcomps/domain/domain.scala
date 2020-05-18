@@ -9,6 +9,11 @@ package object domain {
 
   case class Champion(name: String, roles: Set[Role], cost: Int)
 
+  final case class CompositionConfig(maxTeamSize: Int,
+                                     maxChampionCost: Int,
+                                     requiredRoles: Map[Role, Int],
+                                     requiredChampions: Set[Champion])
+
   final case class Composition(champions: Set[Champion]) {
     val roleCounts: Map[Role, Int] = champions.toSeq
       .flatMap(_.roles.toSeq)
