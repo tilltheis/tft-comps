@@ -12,8 +12,8 @@ object Main extends App {
 
     val compositionConfig = decode[CompositionConfig](event.data.asInstanceOf[String]).toTry.get
 
+    // We cannot search the entire tree. It's too big. Therefore try several times w/ shuffled inputs.
     val results = LazyList(0 until 500: _*).flatMap { _ =>
-      // Shuffle champion list because the order of champions influences the result.
       search(
         Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
         compositionConfig.maxTeamSize,

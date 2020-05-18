@@ -3,9 +3,7 @@ package tftcomps
 package object domain {
   val MaxRolesPerChampion = 3 // Irelia, Gankplank, MissFortune
 
-  case class Role(name: String, stackingBonusThresholds: Set[Int]) {
-    val sortedThresholdsArray: Array[Int] = stackingBonusThresholds.toSeq.sorted.toArray
-  }
+  case class Role(name: String, stackingBonusThresholds: Set[Int])
 
   case class Champion(name: String, roles: Set[Role], cost: Int)
 
@@ -57,7 +55,7 @@ package object domain {
   def search(championPool: Seq[Champion],
              maxTeamSize: Int,
              requiredRoleCounts: Map[Role, Int] = Map.empty,
-             requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] = {
+             requiredChampions: Set[Champion] = Set.empty): Option[Composition] = {
     val backend = MinRoleThresholdSearchBackend
     val requiredRoles = requiredRoleCounts.filter(_._2 > 0)
 
@@ -90,7 +88,7 @@ package object domain {
       * @return `LazyList((composition, bound))` so that another algorithm can continue from the result
       */
     def genericIdaStar(root: Composition, maxSize: Int, initialCost: Int = 0, allowIncomplete: Boolean = false)(
-        f: (Int, Int) => Int): LazyList[(Composition, Int)] = {
+        f: (Int, Int) => Int): Option[(Composition, Int)] = {
       val h = backend.heuristic(_, maxTeamSize)
       val d = backend.distance _
 
@@ -115,27 +113,24 @@ package object domain {
             }
       }
 
-      if (root.size >= maxSize) LazyList(root -> 0)
-      else
-        LazyList
-          .unfold(Option(h(root))) { maybeBound =>
-            maybeBound.flatMap { bound =>
-              go(root, initialCost, bound) match {
-                case Left(Int.MaxValue)             => None
-                case Left(newBound)                 => Some((None, Some(newBound)))
-                case Right(composition -> newBound) => Some((Some((composition, newBound)), None))
-              }
-            }
+      if (root.size >= maxSize) Some(root -> 0)
+      else {
+        var bound = h(root)
+        var result: Option[(Composition, Int)] = None
+        while (result.isEmpty && bound < Int.MaxValue) {
+          go(root, initialCost, bound) match {
+            case Left(newBound)               => bound = newBound
+            case Right(composition -> gScore) => result = Some((composition, gScore))
           }
-          .collect {
-            case Some(x) => x
-          }
+        }
+        result
+      }
     }
 
     def nonGreedyF(g: Int, h: Int): Int = g + h
     def greedyF(g: Int, h: Int): Int = h
 
-    if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) LazyList.empty
+    if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) None
     else {
       val initialComposition = Composition(requiredChampions)
       val firstTeamSize = Math.max(0, maxTeamSize - 2)
@@ -143,9 +138,9 @@ package object domain {
         initialComposition,
         firstTeamSize,
         allowIncomplete = true
-      )(greedyF).take(1) // todo dont forget
+      )(greedyF)
 
-      val secondResult = firstResult.headOption.fold(LazyList.empty[(Composition, Int)]) {
+      val secondResult = firstResult.flatMap {
         case (secondInitComp, secondInitCost) =>
           val secondTeamSize = maxTeamSize
           genericIdaStar(
@@ -156,7 +151,7 @@ package object domain {
       }
 
       secondResult.map {
-        case composition -> _bound => composition
+        case composition -> _gScore => composition
       }
     }
   }

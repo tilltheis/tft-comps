@@ -11,7 +11,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
     def searchWithMinRoleThresholds(championPool: Seq[Champion],
                                     maxTeamSize: Int,
                                     requiredRoles: Set[Role] = Set.empty,
-                                    requiredChampions: Set[Champion] = Set.empty): LazyList[Composition] =
+                                    requiredChampions: Set[Champion] = Set.empty): Option[Composition] =
       search(championPool,
              maxTeamSize,
              requiredRoles.map(r => r -> r.stackingBonusThresholds.min).toMap,
@@ -28,12 +28,12 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role2, role4), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      searchWithMinRoleThresholds(allChampions, 2).head should {
+      searchWithMinRoleThresholds(allChampions, 2).get should {
         equal(Composition(Set(champ1, champ2))) or
           equal(Composition(Set(champ1, champ4)))
       }
 
-      searchWithMinRoleThresholds(allChampions, 3).head should ===(Composition(Set(champ1, champ2, champ4)))
+      searchWithMinRoleThresholds(allChampions, 3).get should ===(Composition(Set(champ1, champ2, champ4)))
     }
 
     "be possible around a required set of champions" in {
@@ -46,7 +46,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
 
       val result = searchWithMinRoleThresholds(allChampions, 3, requiredChampions = Set(champ1, champ2))
       result should not be empty
-      result.head should {
+      result.get should {
         equal(Composition(Set(champ1, champ2, champ3))) or
           equal(Composition(Set(champ1, champ2, champ4)))
       }
@@ -60,7 +60,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      searchWithMinRoleThresholds(allChampions, 1, requiredChampions = Set(champ1, champ2)) should ===(LazyList.empty)
+      searchWithMinRoleThresholds(allChampions, 1, requiredChampions = Set(champ1, champ2)) shouldBe empty
     }
 
     "be possible around a required set of roles" in {
@@ -77,11 +77,11 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
 
       val result1 = searchWithMinRoleThresholds(allChampions, 3, requiredRoles = Set(role1, role2))
       result1 should not be empty
-      result1.head.roleCounts.keySet should contain allElementsOf (Set(role1, role2))
+      result1.get.roleCounts.keySet should contain allElementsOf (Set(role1, role2))
 
       val result2 = searchWithMinRoleThresholds(allChampions, 2, requiredRoles = Set(role3))
       result2 should not be empty
-      result2.head.roleCounts.keySet should contain allElementsOf (Set(role3))
+      result2.get.roleCounts.keySet should contain allElementsOf (Set(role3))
     }
 
     "be possible around a required set of roles, including zeros" in {
@@ -100,7 +100,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val result1 =
         search(allChampions, 3, requiredRoleCounts = allRoles.map(_ -> 0).toMap.updated(role2, 3))
       result1 should not be empty
-      result1.head should ===(Composition(Set(champ2, champ4, champ5)))
+      result1.get should ===(Composition(Set(champ2, champ4, champ5)))
     }
 
     "find nothing when the number of required roles is greater than the team size" in {
@@ -112,7 +112,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ4 = Champion("champ4", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3, champ4)
 
-      searchWithMinRoleThresholds(allChampions, 1, requiredRoles = Set(role1, role2)) should ===(LazyList.empty)
+      searchWithMinRoleThresholds(allChampions, 1, requiredRoles = Set(role1, role2)) should ===(None)
     }
 
     "find nothing when the number of required roles cannot be satisfied because the count threshold cannot be reached" in {
@@ -122,7 +122,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val champ3 = Champion("champ3", Set(role1), 1)
       val allChampions = Seq(champ1, champ2, champ3)
 
-      searchWithMinRoleThresholds(allChampions, 2, requiredRoles = Set(role1)) should ===(LazyList.empty)
+      searchWithMinRoleThresholds(allChampions, 2, requiredRoles = Set(role1)) should ===(None)
     }
 
     "find something when role and champion requirements don't overlap but can be fulifilled" in {
@@ -137,7 +137,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val allChampions = Seq(champ1, champ2, champ3, champ4, champ5)
 
       searchWithMinRoleThresholds(allChampions, 4, requiredRoles = Set(role1), requiredChampions = Set(champ4)) should ===(
-        LazyList(Composition(Set(champ1, champ2, champ3, champ4))))
+        Some(Composition(Set(champ1, champ2, champ3, champ4))))
     }
 
     "find 6 cyber, 2 infil in real dataset" in {
