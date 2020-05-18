@@ -17,10 +17,11 @@ object Main extends App {
       val maybeComposition = search(
         Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
         compositionConfig.maxTeamSize,
+        compositionConfig.searchThoroughness,
         compositionConfig.requiredRoles,
         compositionConfig.requiredChampions
       )
-      maybeComposition.foreach(composition => scalajs.js.Dynamic.global.postMessage(composition.asJson.noSpaces))
+      scalajs.js.Dynamic.global.postMessage(maybeComposition.asJson.noSpaces)
       scalajs.js.timers.setTimeout(0)(go(times - 1)) // give the computer time to breath
     }
     go(500)

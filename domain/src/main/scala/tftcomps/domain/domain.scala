@@ -10,23 +10,24 @@ package object domain {
   final case class CompositionConfig(maxTeamSize: Int,
                                      maxChampionCost: Int,
                                      requiredRoles: Map[Role, Int],
-                                     requiredChampions: Set[Champion])
+                                     requiredChampions: Set[Champion],
+                                     searchThoroughness: Int)
 
   final case class Composition(champions: Set[Champion]) {
     val roleCounts: Map[Role, Int] = champions.toSeq
       .flatMap(_.roles.toSeq)
       .groupMapReduce(identity)(_ => 1)(_ + _)
 
-    def unreachedThresholdRoleOffsets: Map[Role, Int] = roleCounts.collect {
-      case (role, count) if role.stackingBonusThresholds.min > count =>
-        role -> (role.stackingBonusThresholds.min - count)
-    }
-
     def size: Int = champions.size
 
     def add(champion: Champion): Composition = Composition(champions + champion)
 
-    def synergyPercentage: Double = 1.0d - unreachedThresholdRoleOffsets.values.sum.toDouble / roleCounts.values.sum
+    def synergyPercentage: Double = {
+      val reachedThresholdRoleCount = roleCounts.collect {
+        case (role, count) if role.stackingBonusThresholds.min <= count => count
+      }.sum
+      reachedThresholdRoleCount.toDouble / roleCounts.values.sum.toDouble
+    }
   }
 
   object Composition {
@@ -49,11 +50,15 @@ package object domain {
     }
 
     private def missingRoleSlotCount(composition: Composition) =
-      composition.unreachedThresholdRoleOffsets.values.sum * 10
+      composition.roleCounts.collect {
+        case (role, count) if role.stackingBonusThresholds.min > count =>
+          (role.stackingBonusThresholds.min - count) * 10
+      }.sum
   }
 
   def search(championPool: Seq[Champion],
              maxTeamSize: Int,
+             thoroughness: Int,
              requiredRoleCounts: Map[Role, Int] = Map.empty,
              requiredChampions: Set[Champion] = Set.empty): Option[Composition] = {
     val backend = MinRoleThresholdSearchBackend
@@ -132,8 +137,8 @@ package object domain {
 
     if (requiredChampions.size > maxTeamSize || requiredRoles.size > maxTeamSize * MaxRolesPerChampion) None
     else {
-      val initialComposition = Composition(requiredChampions)
-      val firstTeamSize = Math.max(0, maxTeamSize - 2)
+      val initialComposition = Composition.empty
+      val firstTeamSize = Math.max(0, maxTeamSize - thoroughness)
       val firstResult = genericIdaStar(
         initialComposition,
         firstTeamSize,

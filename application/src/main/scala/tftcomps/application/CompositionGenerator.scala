@@ -7,14 +7,19 @@ import org.scalajs.dom.raw.{MessageEvent, Worker}
 import tftcomps.domain.{Composition, CompositionConfig, data}
 
 object CompositionGenerator {
-  final case class State(compositionConfig: CompositionConfig, compositions: Seq[Composition], worker: Option[Worker])
+  final case class State(compositionConfig: CompositionConfig,
+                         compositions: Seq[Composition],
+                         searchResultCount: Int,
+                         worker: Option[Worker])
   object State {
     val empty: State = State(
       CompositionConfig(maxTeamSize = 8,
                         maxChampionCost = 5,
                         requiredRoles = data.roles.all.map(_ -> 0).toMap,
-                        requiredChampions = Set.empty),
+                        requiredChampions = Set.empty,
+                        searchThoroughness = 2),
       Seq.empty,
+      0,
       None
     )
   }
@@ -29,10 +34,14 @@ object CompositionGenerator {
       val spawnWorker = CallbackTo {
         val worker = new Worker("../../../../webworker/target/scala-2.13/tft-comps-webworker-fastopt.js")
         worker.onmessage = { (event: MessageEvent) =>
-          val composition = decode[Composition](event.data.asInstanceOf[String]).toTry.get
-          $.modState(s =>
-            s.copy(compositions = (s.compositions :+ composition).distinct.sortBy(-_.synergyPercentage).take(50)))
-            .runNow()
+          val maybeComposition = decode[Option[Composition]](event.data.asInstanceOf[String]).toTry.get
+          $.modState { state =>
+            val newCompositions = maybeComposition.fold(state.compositions)(state.compositions :+ _)
+            state.copy(
+              compositions = newCompositions.distinct.sortBy(-_.synergyPercentage).take(50),
+              searchResultCount = state.searchResultCount + 1
+            )
+          }.runNow()
         }
         worker
       }
@@ -46,7 +55,7 @@ object CompositionGenerator {
       <.div(
         <.h1("TFT Team Composition Generator"),
         CompositionForm(state.compositionConfig, handleCompositionConfigChange),
-        CompositionResults(state.compositions)
+        CompositionResults(state.compositions, state.searchResultCount)
       )
     }
   }

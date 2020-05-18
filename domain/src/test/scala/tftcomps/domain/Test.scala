@@ -7,6 +7,19 @@ import org.scalatest.wordspec.AnyWordSpec
 import scala.util.Random
 
 class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
+  "Composition" should {
+    "calculate a correct synergyPercentage" in {
+      val role1 = Role("role1", Set(2))
+      val role2 = Role("role2", Set(3))
+      val role3 = Role("role3", Set(2))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role1, role2, role3), 1)
+      val champ3 = Champion("champ3", Set(role2), 1)
+
+      Composition(Set(champ1, champ2, champ3)).synergyPercentage should ===((2.0 / 5.0) +- 0.1d)
+    }
+  }
+
   "search" should {
     def searchWithMinRoleThresholds(championPool: Seq[Champion],
                                     maxTeamSize: Int,
@@ -14,6 +27,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
                                     requiredChampions: Set[Champion] = Set.empty): Option[Composition] =
       search(championPool,
              maxTeamSize,
+             2,
              requiredRoles.map(r => r -> r.stackingBonusThresholds.min).toMap,
              requiredChampions)
 
@@ -98,7 +112,7 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       val allChampions = Seq(champ1, champ2, champ3, champ4, champ5, champ6)
 
       val result1 =
-        search(allChampions, 3, requiredRoleCounts = allRoles.map(_ -> 0).toMap.updated(role2, 3))
+        search(allChampions, 3, 2, requiredRoleCounts = allRoles.map(_ -> 0).toMap.updated(role2, 3))
       result1 should not be empty
       result1.get should ===(Composition(Set(champ2, champ4, champ5)))
     }
@@ -141,11 +155,23 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
     }
 
     "find 6 cyber, 2 infil in real dataset" in {
-      search(data.champions.all.toSeq, 8, Map(data.roles.Cybernetic -> 6, data.roles.Infiltrator -> 2)) should not be empty
+      search(data.champions.all.toSeq, 8, 2, Map(data.roles.Cybernetic -> 6, data.roles.Infiltrator -> 2)) should not be empty
+    }
+
+    "find 3 blade, 2 celest, 4 chrono, 2 valk in real dataset" in {
+      val result = search(
+        data.champions.all.toSeq,
+        8,
+        8,
+        Map(data.roles.Blademaster -> 3, data.roles.Celestial -> 2, data.roles.Chrono -> 4, data.roles.Valkyrie -> 2)
+      )
+
+      println(result)
+      result should not be empty
     }
 
     "find something in the real dataset" in {
-      search(Random.shuffle(data.champions.all.toSeq), 8) should not be empty
+      search(Random.shuffle(data.champions.all.toSeq), 8, 2) should not be empty
     }
 
   }

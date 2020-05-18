@@ -8,7 +8,10 @@ object CompositionForm {
   final case class Props(compositionConfig: CompositionConfig, onCompositionConfigChange: CompositionConfig => Callback)
 
   val Component = ScalaFnComponent[Props] { props =>
-    def numberSlider(title: String, possibleValues: Range, selectedValue: Int)(onChange: Int => Callback) = <.label(
+    def numberSlider(title: String,
+                     possibleValues: Range,
+                     selectedValue: Int,
+                     maybeExplanation: Option[VdomNode] = None)(onChange: Int => Callback) =<.label(
       ^.marginBottom := 0.5.rem,
       ^.display := "flex",
       ^.alignItems := "center",
@@ -23,6 +26,7 @@ object CompositionForm {
         ^.onChange ==> ((e: ReactEventFromInput) => onChange(e.target.value.toInt))
       ),
       <.div(^.width := 10.rem, s" $selectedValue"),
+      maybeExplanation
     )
 
     def checkboxSet[A](title: String, possibleValues: Set[A], selectedValues: Set[A])(stringProjection: A => String)(
@@ -36,18 +40,21 @@ object CompositionForm {
         ^.columnGap := 0.rem,
         possibleValues.toSeq
           .sortBy(stringProjection)
-          .toTagMod(value =>
+          .toTagMod { value =>
+            val isSelected = selectedValues.contains(value)
             <.label(
               ^.display := "block",
               <.input(
                 ^.`type` := "checkbox",
                 ^.value := stringProjection(value),
+                ^.checked := isSelected,
                 ^.onChange ==> { (e: ReactEventFromInput) =>
                   onChange(if (e.target.checked) selectedValues + value else selectedValues - value)
                 }
               ),
-              stringProjection(value)
-          ))
+              <.span(^.fontWeight := (if (isSelected) "bold" else "normal"), stringProjection(value))
+            )
+          }
       )
     )
 
@@ -63,12 +70,14 @@ object CompositionForm {
           .sortBy(_._1.name)
           .toTagMod {
             case (role, count) =>
+              val isChanged = count > 0
               <.div(
                 ^.pageBreakInside := "avoid",
                 ^.marginBottom := 0.5.rem,
                 <.label(
                   ^.display := "block",
-                  <.div(s"$count/${role.stackingBonusThresholds.max} ${role.name}"),
+                  <.div(^.fontWeight := (if (isChanged) "bold" else "normal"),
+                        s"$count/${role.stackingBonusThresholds.max} ${role.name}"),
                   <.input(
                     ^.margin := 0.rem,
                     ^.width := "100%",
@@ -97,6 +106,18 @@ object CompositionForm {
         props.onCompositionConfigChange(props.compositionConfig.copy(requiredRoles = x))),
       checkboxSet("Required Champions", tftcomps.domain.data.champions.all, props.compositionConfig.requiredChampions)(
         _.name)(x => props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),
+      numberSlider(
+        "Search thoroughness",
+        0 to 10,
+        props.compositionConfig.searchThoroughness,
+        Some(
+          <.i(
+            "Increasing this ",
+            <.i(^.fontStyle := "normal", "might"),
+            " result in finding results where none could be found before. ",
+            "Usually, it just leads to slower searches with even fewer (but good) results."
+          ))
+      )(x => props.onCompositionConfigChange(props.compositionConfig.copy(searchThoroughness = x)))
     )
   }
 

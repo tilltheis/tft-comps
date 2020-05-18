@@ -6,22 +6,22 @@ import tftcomps.domain.Composition
 
 object CompositionResults {
 
-  final case class Props(compositions: Seq[Composition])
+  final case class Props(compositions: Seq[Composition], searchResultCount: Int)
 
   val Component = ScalaFnComponent[Props] { props =>
-    if (props.compositions.isEmpty) <.p("No results.")
+    if (props.compositions.isEmpty) <.p(s"No results from ${props.searchResultCount}/500 searches.")
     else {
       val synergyPercentages = props.compositions.map(_.synergyPercentage.*(100).toInt)
       <.div(
         <.p(
-          s"Found top ${props.compositions.size} compositions between ${synergyPercentages.min}% and ${synergyPercentages.max}% synergy."),
+          s"Showing top ${props.compositions.size} compositions between ${synergyPercentages.min}% and ${synergyPercentages.max}% synergy from ${props.searchResultCount}/500 searches."),
         <.dl(
           ^.display := "flex",
           ^.flexDirection := "column",
           ^.flexWrap := "wrap",
           ^.alignContent := "flex-start",
           ^.height := 2.rem,
-          props.compositions.groupBy(_.synergyPercentage.*(100).toInt).toSeq.reverse.toTagMod {
+          props.compositions.groupBy(_.synergyPercentage.*(100).toInt).toSeq.sortBy(-_._1).toTagMod {
             case (synergyPercentage, comps) =>
               React.Fragment(
                 <.dt(^.width := 10.rem, ^.height := 1.rem, ^.fontWeight := "bold", s"$synergyPercentage%"),
@@ -45,5 +45,5 @@ object CompositionResults {
     }
   }
 
-  def apply(compositions: Seq[Composition]) = Component(Props(compositions))
+  def apply(compositions: Seq[Composition], searchResultCount: Int) = Component(Props(compositions, searchResultCount))
 }
