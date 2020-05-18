@@ -14,7 +14,7 @@ object CompositionResults {
       val synergyPercentages = props.compositions.map(_.synergyPercentage)
       <.div(
         <.p(
-          s"Found ${props.compositions.size} compositions between ${(synergyPercentages.min * 100).toInt}% and ${(synergyPercentages.max * 100).toInt}% quality."),
+          s"Found ${props.compositions.size} compositions between ${(synergyPercentages.min * 100).toInt}% and ${(synergyPercentages.max * 100).toInt}% synergy."),
         <.dl(
           ^.display := "flex",
           ^.flexDirection := "column",
