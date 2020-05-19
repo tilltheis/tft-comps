@@ -1,12 +1,15 @@
 package tftcomps.domain
 
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.util.Random
 
-class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
+class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals with ScalaCheckDrivenPropertyChecks {
   "Composition" should {
     "calculate a correct synergyPercentage" in {
       val role1 = Role("role1", Set(2))
@@ -91,11 +94,11 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
 
       val result1 = searchWithMinRoleThresholds(allChampions, 3, requiredRoles = Set(role1, role2))
       result1 should not be empty
-      result1.get.roleCounts.keySet should contain allElementsOf (Set(role1, role2))
+      result1.get.roleCounts.keySet should contain allElementsOf Set(role1, role2)
 
       val result2 = searchWithMinRoleThresholds(allChampions, 2, requiredRoles = Set(role3))
       result2 should not be empty
-      result2.get.roleCounts.keySet should contain allElementsOf (Set(role3))
+      result2.get.roleCounts.keySet should contain allElementsOf Set(role3)
     }
 
     "be possible around a required set of roles, including zeros" in {
@@ -174,6 +177,20 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
       search(Random.shuffle(data.champions.all.toSeq), 8, 2) should not be empty
     }
 
+    "find the shortest path" in {
+      val maxTeamSize = 4
+      val h = MinRoleThresholdSearchBackend.heuristic(_, maxTeamSize)
+      val d = MinRoleThresholdSearchBackend.distance _
+
+      forAll(championPoolGen(6)) { championPool =>
+        val bruteForcedShortestPaths =
+          bruteForceShortestPaths(maxTeamSize, h, d, championPool).map(x => x.composition -> x.cost)
+        val maybeFoundShortestPath = searchReturningCost(championPool, maxTeamSize, maxTeamSize)
+
+        if (bruteForcedShortestPaths.isEmpty) maybeFoundShortestPath shouldBe empty
+        else bruteForcedShortestPaths should contain(maybeFoundShortestPath.get)
+      }
+    }
   }
 
   "MinRoleThresholdSearchBackend" should {
@@ -194,6 +211,75 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals {
 
       h(comp1) should be > h(comp2)
     }
+
+    "have an admissible heuristic" in {
+      val maxTeamSize = 4
+      val h = MinRoleThresholdSearchBackend.heuristic(_, maxTeamSize)
+      val d = MinRoleThresholdSearchBackend.distance _
+
+      forAll(championPoolGen(6)) { championPool =>
+        bruteForceShortestPaths(maxTeamSize, h, d, championPool).foreach { shortestPath =>
+          shortestPath.heuristics.zipWithIndex.foreach {
+            case (heuristic, index) =>
+              val existingChampions = shortestPath.champions.take(index)
+              val newChampion = shortestPath.champions.lift(index - 1)
+              withClue(s"heuristicIndex=$index existingChampions=$existingChampions newChampion=$newChampion") {
+                val cost = shortestPath.distances.drop(index).sum
+                heuristic should be <= cost
+              }
+          }
+        }
+      }
+    }
   }
 
+  val roleNumbers = Iterator.from(0)
+  val champNumbers = Iterator.from(0)
+  implicit val arbRole: Arbitrary[Role] = Arbitrary {
+    for {
+      thresholds <- Gen.containerOfN[Set, Int](2, Gen.choose(1, 6)).filter(_.nonEmpty)
+      id = roleNumbers.next()
+    } yield (Role(s"role$id", thresholds))
+  }
+  implicit val arbChampion: Arbitrary[Champion] = Arbitrary {
+    for {
+      role1 <- arbitrary[Role]
+      role2 <- arbitrary[Role]
+      cost <- Gen.choose(1, 5)
+      id = champNumbers.next()
+    } yield Champion(s"champ$id", Set(role1, role2), cost)
+  }
+  def championPoolGen(size: Int): Gen[Seq[Champion]] =
+    Gen.containerOfN[Seq, Champion](size, arbitrary[Champion]).filter(_.nonEmpty)
+
+  final case class Path(composition: Composition,
+                        champions: Seq[Champion],
+                        heuristics: Seq[Int],
+                        distances: Seq[Int],
+                        cost: Int)
+  def bruteForceShortestPaths(maxTeamSize: Int,
+                              h: Composition => Int,
+                              d: (Composition, Champion) => Int,
+                              championPool: Seq[Champion]): Seq[Path] = {
+    championPool
+      .combinations(maxTeamSize)
+      .flatMap(_.permutations)
+      .map { champions =>
+        champions.foldLeft(Path(Composition.empty, Seq.empty[Champion], Seq(h(Composition.empty)), Seq(0), 0)) {
+          case (Path(composition, champions, heuristics, distances, cost), champion) =>
+            Path(
+              composition.add(champion),
+              champions :+ champion,
+              heuristics :+ h(composition.add(champion)),
+              distances :+ d(composition, champion),
+              cost + d(composition, champion)
+            )
+        }
+      }
+      .toSeq
+      .groupBy(_.cost)
+      .minByOption(_._1)
+      .map(_._2)
+      .getOrElse(Seq.empty)
+  }
 }

@@ -21,8 +21,10 @@ lazy val domain = crossProject(JSPlatform, JVMPlatform)
   .settings(
     commonSettings,
     name := "tft-comps-domain",
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.1" % Test,
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.1" % Test // intellij needs this to run shared tests
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.1.2" % Test,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.2" % Test, // intellij needs this to run shared tests
+    libraryDependencies += "org.scalatestplus" %%% "scalacheck-1-14" % "3.1.2.0" % Test,
+    libraryDependencies += "org.scalatestplus" %% "scalacheck-1-14" % "3.1.2.0" % Test
   )
 
 lazy val application = project

@@ -55,12 +55,21 @@ package object domain {
           (role.stackingBonusThresholds.min - count) * 10
       }.sum
   }
-
   def search(championPool: Seq[Champion],
              maxTeamSize: Int,
              thoroughness: Int,
              requiredRoleCounts: Map[Role, Int] = Map.empty,
              requiredChampions: Set[Champion] = Set.empty): Option[Composition] = {
+    searchReturningCost(championPool, maxTeamSize, thoroughness, requiredRoleCounts, requiredChampions).map {
+      case composition -> _gScore => composition
+    }
+  }
+
+  def searchReturningCost(championPool: Seq[Champion],
+                          maxTeamSize: Int,
+                          thoroughness: Int,
+                          requiredRoleCounts: Map[Role, Int] = Map.empty,
+                          requiredChampions: Set[Champion] = Set.empty): Option[(Composition, Int)] = {
     val backend = MinRoleThresholdSearchBackend
     val requiredRoles = requiredRoleCounts.filter(_._2 > 0)
 
@@ -155,9 +164,7 @@ package object domain {
           )(nonGreedyF)
       }
 
-      secondResult.map {
-        case composition -> _gScore => composition
-      }
+      secondResult
     }
   }
 
