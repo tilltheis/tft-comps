@@ -168,8 +168,6 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals with S
         8,
         Map(data.roles.Blademaster -> 3, data.roles.Celestial -> 2, data.roles.Chrono -> 4, data.roles.Valkyrie -> 2)
       )
-
-      println(result)
       result should not be empty
     }
 
