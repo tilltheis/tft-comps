@@ -11,7 +11,7 @@ object CompositionForm {
     def numberSlider(title: String,
                      possibleValues: Range,
                      selectedValue: Int,
-                     maybeExplanation: Option[VdomNode] = None)(onChange: Int => Callback) =<.label(
+                     maybeExplanation: Option[VdomNode] = None)(onChange: Int => Callback) = <.label(
       ^.marginBottom := 0.5.rem,
       ^.display := "flex",
       ^.alignItems := "center",
