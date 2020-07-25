@@ -158,21 +158,27 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals with S
     }
 
     "find 6 cyber, 2 infil in real dataset" in {
-      search(data.champions.all.toSeq, 8, 2, Map(data.roles.Cybernetic -> 6, data.roles.Infiltrator -> 2)) should not be empty
+      search(data.set3_0.champions.all.toSeq,
+             8,
+             2,
+             Map(data.set3_0.roles.Cybernetic -> 6, data.set3_0.roles.Infiltrator -> 2)) should not be empty
     }
 
     "find 3 blade, 2 celest, 4 chrono, 2 valk in real dataset" in {
       val result = search(
-        data.champions.all.toSeq,
+        data.set3_0.champions.all.toSeq,
         8,
         8,
-        Map(data.roles.Blademaster -> 3, data.roles.Celestial -> 2, data.roles.Chrono -> 4, data.roles.Valkyrie -> 2)
+        Map(data.set3_0.roles.Blademaster -> 3,
+            data.set3_0.roles.Celestial -> 2,
+            data.set3_0.roles.Chrono -> 4,
+            data.set3_0.roles.Valkyrie -> 2)
       )
       result should not be empty
     }
 
     "find something in the real dataset" in {
-      search(Random.shuffle(data.champions.all.toSeq), 8, 2) should not be empty
+      search(Random.shuffle(data.set3_0.champions.all.toSeq), 8, 2) should not be empty
     }
 
     "find the shortest path" in {

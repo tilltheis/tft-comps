@@ -15,7 +15,7 @@ object CompositionGenerator {
     val empty: State = State(
       CompositionConfig(maxTeamSize = 8,
                         maxChampionCost = 5,
-                        requiredRoles = data.roles.all.map(_ -> 0).toMap,
+                        requiredRoles = data.CurrentSet.roles.all.map(_ -> 0).toMap,
                         requiredChampions = Set.empty,
                         searchThoroughness = 2),
       Seq.empty,

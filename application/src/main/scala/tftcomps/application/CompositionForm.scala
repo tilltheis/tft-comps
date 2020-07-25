@@ -104,8 +104,10 @@ object CompositionForm {
         props.onCompositionConfigChange(props.compositionConfig.copy(maxChampionCost = x))),
       requiredRolesField("Required Traits", props.compositionConfig.requiredRoles)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(requiredRoles = x))),
-      checkboxSet("Required Champions", tftcomps.domain.data.champions.all, props.compositionConfig.requiredChampions)(
-        _.name)(x => props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),
+      checkboxSet("Required Champions",
+                  tftcomps.domain.data.CurrentSet.champions.all,
+                  props.compositionConfig.requiredChampions)(_.name)(x =>
+        props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),
       numberSlider(
         "Search thoroughness",
         0 to 10,

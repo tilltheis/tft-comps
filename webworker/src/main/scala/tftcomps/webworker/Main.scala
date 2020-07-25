@@ -15,7 +15,7 @@ object Main extends App {
     // We cannot search the entire tree. It's too big. Therefore try several times w/ shuffled inputs.
     def go(times: Int): Unit = if (times > 0) {
       val maybeComposition = search(
-        Random.shuffle(data.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
+        Random.shuffle(data.CurrentSet.champions.all.toSeq).filter(_.cost <= compositionConfig.maxChampionCost),
         compositionConfig.maxTeamSize,
         compositionConfig.searchThoroughness,
         compositionConfig.requiredRoles,
