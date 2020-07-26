@@ -45,6 +45,7 @@ object ChampionComposition {
       case StarGuardian  => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
       case Starship      => go(1 -> Gold)
       case Vanguard      => go(2 -> Bronze, 4 -> Gold)
+      case _             => None
     }
   }
 
