@@ -27,6 +27,9 @@ lazy val domain = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "org.scalatestplus" %% "scalacheck-1-14" % "3.1.2.0" % Test
   )
 
+lazy val copyAssetsToTargetDirectory =
+  taskKey[Unit]("Copy assets from resources to target directory to have same paths for development and production")
+
 lazy val application = project
   .in(file("application"))
   .dependsOn(domain.js)
@@ -36,9 +39,22 @@ lazy val application = project
     scalaJSUseMainModuleInitializer := true,
     webpackBundlingMode := BundlingMode.LibraryOnly(),
     libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "1.7.0",
-    npmDependencies in Compile ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1")
+    npmDependencies in Compile ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1"),
+    sourceDirectory in Assets := file("application/src/main/resources"),
+    copyAssetsToTargetDirectory := {
+      println("Copying CSS to resources...")
+      val source = file("application/src/main/resources/images")
+      val target = file("application/target/web/sass/main/images")
+      IO.copyDirectory(source, target)
+      println("Done")
+    },
+    compile in Compile := {
+      val x = (compile in Compile).value
+      copyAssetsToTargetDirectory.value
+      x
+    }
   )
-  .enablePlugins(ScalaJSBundlerPlugin)
+  .enablePlugins(ScalaJSBundlerPlugin, SbtSassify)
 
 lazy val webworker = project
   .in(file("webworker"))

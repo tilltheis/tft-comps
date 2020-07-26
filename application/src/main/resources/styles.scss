@@ -1,0 +1,112 @@
+.composition {
+  display: flex;
+  text-align: center;
+
+  .roles {
+    list-style: none;
+    padding-left: 0;
+    width: 10rem;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+
+    .role {
+      $bronze: #C68A6B;
+      $silver: #BDDBDE;
+      $gold: #EFD377;
+      $dirt: #403A3A69;
+
+      $chromatic-desaturation-amount: 50%;
+      $chromatic: conic-gradient(
+        desaturate(#B5FFB5, $chromatic-desaturation-amount),
+        desaturate(#A5FBF7, $chromatic-desaturation-amount),
+        desaturate(#ADB6FF, $chromatic-desaturation-amount),
+        desaturate(#EF9EFF, $chromatic-desaturation-amount),
+        desaturate(#ADFBFF, $chromatic-desaturation-amount),
+        desaturate(#FFFFF7, $chromatic-desaturation-amount),
+        desaturate(#FFFFCE, $chromatic-desaturation-amount),
+        desaturate(#FFB294, $chromatic-desaturation-amount),
+        desaturate(#BDF7B5, $chromatic-desaturation-amount), // half
+        desaturate(#C8B6EF, $chromatic-desaturation-amount),
+        desaturate(#D6EBFF, $chromatic-desaturation-amount),
+        desaturate(#ADFFE7, $chromatic-desaturation-amount),
+        desaturate(#ADFFBD, $chromatic-desaturation-amount),
+        desaturate(#FFFFEF, $chromatic-desaturation-amount),
+        desaturate(#FFFFBD, $chromatic-desaturation-amount),
+        desaturate(#A5FFF7, $chromatic-desaturation-amount),
+        desaturate(#F78EFF, $chromatic-desaturation-amount),
+        desaturate(#B5FFB5, $chromatic-desaturation-amount)
+      );
+      $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "chromatic": $chromatic);
+
+      width: 40px;
+      height: 40px;
+      display: flex;
+      background-position: 50% 40%;
+      font-size: 0;
+      position: relative;
+
+
+      &:before {
+        content: "⬢";
+        font-size: 40px;
+        -webkit-text-stroke: 3px black;
+        text-indent: 0;
+
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+
+        position: relative;
+        display: inline-block;
+        z-index: -1;
+
+        color: $dirt; // default color
+      }
+
+      &:hover:after {
+        box-sizing: border-box;
+        content: attr(data-name);
+        border: 1px solid black;
+        position: absolute;
+        font-size: 16px;
+        display: inline-block;
+        white-space: nowrap;
+
+        margin-top: 40px;
+
+        margin-left: 50%;
+        transform: translateX(-50%);
+
+        padding: 0.1rem 0.4rem;
+        background: #333;
+        color: white;
+        z-index: 1;
+      }
+
+
+      $size: 34px;
+      background-size: $size $size;
+
+      @each $role in astro, battlecast, blademaster, blaster, brawler, celestial, chrono, cybernetic, darkstar, demolitionist, infiltrator, manareaver, mechpilot, mercenary, mystic, paragon, protector, rebel, sniper, sorcerer, spacepirate, starguardian, starship, vanguard {
+        &.#{$role} {
+          background-image: url("images/traits/#{$role}.png");
+        }
+      }
+
+      @each $name, $color in $colors {
+        &.#{$name}:before {
+          @if $color == $chromatic {
+            background-image: $color;
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+          } @else {
+            color: $color;
+          }
+        }
+      }
+
+    }
+  }
+}

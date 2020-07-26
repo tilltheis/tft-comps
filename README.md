@@ -39,4 +39,13 @@ sbt application/fullOptJS::webpack
 
 Checkout the `gh-pages` branch.
 
-Copy both `application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-opt-bundle.js` and `webworker/target/scala-2.13/tft-comps-webworker-opt.js` into the project root, check them in, commit and push.
+```shell script
+cp application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-opt-bundle.js \
+  application/target/web/sass/main/styles.css \
+  webworker/target/scala-2.13/tft-comps-webworker-opt.js \
+  .
+git add tft-comps-application-opt-bundle.js styles.css tft-comps-webworker-opt.js
+```
+
+Then commit and push the changes and that's it.
+
