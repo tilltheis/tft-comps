@@ -54,7 +54,7 @@ object ChampionComposition {
       ^.className := "composition",
       <.h3(^.width := 10.rem, s"${(props.composition.synergyPercentage * 100).toInt}%", <.small(" synergy")),
       <.ol(
-        ^.className := "roles",
+        ^.className := "composition-roles",
         props.composition.roleCounts.toSeq
           .sortBy {
             case (role, count) =>
@@ -76,32 +76,20 @@ object ChampionComposition {
           }
       ),
       <.ul(
+        ^.className := "champions",
         ^.display := "flex",
         ^.listStyle := "none",
         ^.paddingLeft := 0.rem,
         props.composition.champions.toSeq.sortBy(_.name).toTagMod { champion =>
           <.li(
-            ^.width := 10.rem,
-            <.h3(^.margin := "0 0 0.5rem", champion.name),
-            <.img(^.src := s"images/champions/${champion.name.toLowerCase.replaceAll("[^a-z]", "")}.png"),
+            ^.className := Set("champion", champion.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
+            <.h3(champion.name),
             <.ul(
-              ^.display := "flex",
-              ^.justifyContent := "center",
-              ^.listStyle := "none",
+              ^.className := "champion-roles",
               ^.paddingLeft := 0.rem,
               champion.roles.toSeq
                 .sortBy(_.name)
-                .toTagMod(role =>
-                  <.li(
-                    <.img(
-                      ^.src := s"images/traits/${role.name.toLowerCase.replaceAll("[^a-z]", "")}.png",
-                      ^.alt := role.name,
-                      ^.title := role.name,
-                      ^.width := "40px",
-                      ^.height := "40px",
-                      ^.marginTop := "0.25rem"
-                    )
-                ))
+                .toTagMod(role => <.li(^.className := Set("role", role.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "), ^.listStyle := "none", role.name))
             )
           )
         }
