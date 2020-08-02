@@ -1,7 +1,8 @@
 $bronze: #C68A6B;
 $silver: #BDDBDE;
 $gold: #EFD377;
-$dirt: #403A3A69;
+$dirt: #716969;
+$gray: #2e2c2c;
 
 $chromatic-desaturation-amount: 50%;
 $chromatic: conic-gradient(
@@ -26,6 +27,22 @@ $chromatic: conic-gradient(
 );
 $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "chromatic": $chromatic);
 
+html {
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+    linear-gradient(0deg, rgba(255, 0, 150, 0.7), rgba(255, 0, 150, 0.3)),
+    url("images/background.jpg");
+  background-size: cover;
+  min-height: 100%;
+  color: #ddd;
+  font-family: Calibri;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Candara;
+  font-family: Corbel;
+}
+
 .composition {
   display: flex;
   text-align: center;
@@ -40,62 +57,48 @@ $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "c
     align-content: center;
 
     .role {
-
-      width: 40px;
-      height: 40px;
-      display: flex;
-      background-position: 50% 40%;
-      font-size: 0;
       position: relative;
 
-      &:nth-child(7n + 1) {
-        margin-left: 20px;
-      }
-
+      font-size: 16px;
+      text-indent: 40px;
+      text-align: left;
+      height: 40px;
+      line-height: 40px;
+      margin-left: 1rem;
 
       &:before {
         content: "⬢";
         font-size: 40px;
         -webkit-text-stroke: 3px black;
         text-indent: 0;
+        color: $dirt;
 
         width: 40px;
         height: 40px;
         line-height: 40px;
 
-        position: relative;
         display: inline-block;
-        z-index: -1;
 
-        color: $dirt; // default color
-      }
-
-      &:hover:after {
-        box-sizing: border-box;
-        content: attr(data-name);
-        border: 1px solid black;
+        margin-left: -39px;
         position: absolute;
-        font-size: 16px;
-        display: inline-block;
-        white-space: nowrap;
-
-        margin-top: 40px;
-
-        margin-left: 50%;
-        transform: translateX(-50%);
-
-        padding: 0.1rem 0.4rem;
-        background: #333;
-        color: white;
-        z-index: 1;
       }
 
+      &:after {
+        content: ' ';
+        font-size: 40px;
+        $size: 34px;
+        background-size: $size $size;
+        background-position: 0px 2px;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
 
-      $size: 34px;
-      background-size: $size $size;
+        position: absolute;
+        left: 0;
+      }
 
       @each $role in astro, battlecast, blademaster, blaster, brawler, celestial, chrono, cybernetic, darkstar, demolitionist, infiltrator, manareaver, mechpilot, mercenary, mystic, paragon, protector, rebel, sniper, sorcerer, spacepirate, starguardian, starship, vanguard {
-        &.#{$role} {
+        &.#{$role}:after {
           background-image: url("images/traits/#{$role}.png");
         }
       }
@@ -135,6 +138,8 @@ $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "c
         color: #eee;
         background: #222;
         margin: 0;
+        line-height: 40px;
+        font-size: 20px;
       }
 
       box-sizing: border-box;
@@ -166,7 +171,7 @@ $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "c
             font-size: 40px;
             -webkit-text-stroke: 2px #555;
             text-indent: 0;
-            color: $dirt;
+            color: $gray;
 
             width: 40px;
             height: 40px;
