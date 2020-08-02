@@ -52,7 +52,7 @@ object ChampionComposition {
   val Component = ScalaFnComponent[Props] { props =>
     <.div(
       ^.className := "composition",
-      <.h3(^.width := 10.rem, s"${(props.composition.synergyPercentage * 100).toInt}%", <.small(" synergy")),
+      <.h3(^.className := "synergy", s"${(props.composition.synergyPercentage * 100).toInt}%", <.small(" synergy")),
       <.ol(
         ^.className := "composition-roles",
         props.composition.roleCounts.toSeq
@@ -77,13 +77,10 @@ object ChampionComposition {
       ),
       <.ul(
         ^.className := "champions",
-        ^.display := "flex",
-        ^.listStyle := "none",
-        ^.paddingLeft := 0.rem,
         props.composition.champions.toSeq.sortBy(_.name).toTagMod { champion =>
           <.li(
             ^.className := Set("champion", champion.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
-            <.h3(champion.name),
+            <.h3(^.className := "name", champion.name),
             <.ul(
               ^.className := "champion-roles",
               ^.paddingLeft := 0.rem,

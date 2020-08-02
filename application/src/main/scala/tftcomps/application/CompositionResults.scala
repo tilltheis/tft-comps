@@ -37,6 +37,7 @@ object CompositionResults {
               <.li(
                 ^.key := composition.champions.hashCode,
                 ^.marginBottom := 1.rem,
+                ^.height := 20.rem,
                 ChampionComposition(composition, composition.synergyPercentage)
               )
             }

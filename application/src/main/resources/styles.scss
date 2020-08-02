@@ -1,3 +1,5 @@
+$fgColor: #dedede;
+
 $bronze: #C68A6B;
 $silver: #BDDBDE;
 $gold: #EFD377;
@@ -34,7 +36,7 @@ html {
     url("images/background.jpg");
   background-size: cover;
   min-height: 100%;
-  color: #ddd;
+  color: $fgColor;
   font-family: Calibri;
 }
 
@@ -46,15 +48,80 @@ h1, h2, h3, h4, h5, h6 {
 .composition {
   display: flex;
   text-align: center;
+  position: relative;
+
+  overflow: hidden;
+
+  &:hover {
+    position: absolute;
+
+    .synergy {
+      z-index: 2;
+    }
+
+    .composition-roles {
+      z-index: 1;
+
+      &:hover {
+        min-height: 18rem;
+        height: max-content;
+
+        .role &:nth-child(n+8) {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .synergy {
+    position: absolute;
+    transform: rotate(-45deg);
+    width: 10rem;
+    text-align: center;
+    top: -0.5rem;
+    left: -3.75rem;
+    background: #716969;
+
+    small {
+      display: none;
+    }
+  }
 
   .composition-roles {
+    padding: 1rem 2rem;
     list-style: none;
-    padding-left: 0;
     width: 10rem;
+    height: 18rem;
 
     display: flex;
-    flex-wrap: wrap;
-    align-content: center;
+    flex-direction: column;
+    align-content: flex-start;
+
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    background: #291d1b;
+
+    &:not(:hover) .role {
+
+      &:nth-child(n+8) {
+        font-size: 0;
+
+        &:after {
+          display: none;
+        }
+
+        &:nth-child(8) {
+          &:before {
+            content: "…";
+            font-size: 16px;
+            display: block;
+            margin: -1rem 0 0 40px;
+            color: $fgColor;
+            -webkit-text-stroke-width: 0;
+          }
+        }
+      }
+    }
 
     .role {
       position: relative;
@@ -64,7 +131,6 @@ h1, h2, h3, h4, h5, h6 {
       text-align: left;
       height: 40px;
       line-height: 40px;
-      margin-left: 1rem;
 
       &:before {
         content: "⬢";
@@ -115,6 +181,7 @@ h1, h2, h3, h4, h5, h6 {
         }
       }
 
+
     }
   }
 
@@ -126,6 +193,10 @@ h1, h2, h3, h4, h5, h6 {
     .champion {
       width: 10.1rem;
       height: 20rem;
+      overflow: hidden;
+
+      border: 1px solid black;
+      border-radius: 0.5rem;
 
       @each $champion in ahri, annie, ashe, aurelionsol, bard, blitzcrank, caitlyn, cassiopeia, darius, ekko, ezreal, fiora, fizz, gangplank, gnar, graves, illaoi, irelia, janna, jarvaniv, jayce, jhin, jinx, karma, kogmaw, leona, lucian, lulu, malphite, masteryi, mordekaiser, nautilus, neeko, nocturne, poppy, rakan, riven, rumble, shaco, shen, soraka, syndra, teemo, thresh, twistedfate, urgot, vayne, vi, viktor, wukong, xayah, xerath, xinzhao, yasuo, zed, ziggs, zoe {
         &.#{$champion} {
@@ -134,7 +205,7 @@ h1, h2, h3, h4, h5, h6 {
         }
       }
 
-      h3, .champion-roles {
+      .name, .champion-roles {
         color: #eee;
         background: #222;
         margin: 0;
@@ -142,13 +213,15 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 20px;
       }
 
-      box-sizing: border-box;
-      padding-top: 10.1rem;
-      overflow: hidden;
-      transition-duration: 0.3s;
+      .name {
+        transition-duration: 0.3s;
+        margin-top: 10.1rem;
+      }
 
       &:hover {
-        padding-top: 20rem;
+        .name {
+          margin-top: 20rem;
+        }
       }
 
       .champion-roles {
