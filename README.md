@@ -33,18 +33,22 @@ And replace `../../../../webworker/target/scala-2.13/tft-comps-webworker-fastopt
 Then build the app with full optimization settings enabled.
 
 ```shell script
+sbt clean
 sbt webworker/fullOptJS
 sbt application/fullOptJS::webpack
 ```
 
+`git stash` or `git checkout .` to get rid of the uncommitted build and source file changes and be able to changes branches.
+
 Checkout the `gh-pages` branch.
 
 ```shell script
-cp application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-opt-bundle.js \
-  application/target/web/sass/main/styles.css \
+rm -r images
+cp -r application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-opt-bundle.js \
+  application/target/web/sass/main/{images,styles.css} \
   webworker/target/scala-2.13/tft-comps-webworker-opt.js \
   .
-git add tft-comps-application-opt-bundle.js styles.css tft-comps-webworker-opt.js
+git add images styles.css tft-comps-application-opt-bundle.js tft-comps-webworker-opt.js
 ```
 
 Then commit and push the changes and that's it.
