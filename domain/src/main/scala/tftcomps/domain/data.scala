@@ -1,6 +1,195 @@
 package tftcomps.domain
 
 object data {
+  // generate roles and champions from the official data (https://developer.riotgames.com/docs/tft#static-data_current-set) using
+  // jq -r '.[] | "val \(.name): Role = Role(\"\(.name)\", Set(\(.sets | map(.min) | join(", "))))"' traits.json
+  // jq -r '.[] | "val \(.name | gsub("[^a-z]"; ""; "i")): Champion = Champion(\"\(.name)\", Set(\(.traits | select(length > 0) | map(. | sub("^Set5_"; "")) | join(", "))), \(.cost))"' champions.json
+
+  object set5_5 {
+
+    object roles {
+      val Abomination: Role = Role("Abomination", Set(3, 4, 5))
+      val Assassin: Role = Role("Assassin", Set(2, 4, 6))
+      val Brawler: Role = Role("Brawler", Set(2, 4, 6))
+      val Caretaker: Role = Role("Caretaker", Set(1))
+      val Cavalier: Role = Role("Cavalier", Set(2, 3, 4))
+      val Cannoneer: Role = Role("Cannoneer", Set(2, 4, 6))
+      val Cruel: Role = Role("Cruel", Set(1))
+      val Dawnbringer: Role = Role("Dawnbringer", Set(2, 4, 6, 8))
+      val Draconic: Role = Role("Draconic", Set(3, 5))
+      val Forgotten: Role = Role("Forgotten", Set(2, 4, 6, 8))
+      val Hellion: Role = Role("Hellion", Set(2, 4, 6, 8))
+      val Inanimate: Role = Role("Inanimate", Set(1))
+      val Invoker: Role = Role("Invoker", Set(2, 4))
+      val Ironclad: Role = Role("Ironclad", Set(2, 3, 4))
+      val Knight: Role = Role("Knight", Set(2, 4, 6))
+      val Legionnaire: Role = Role("Legionnaire", Set(2, 4, 6, 8))
+      val Mystic: Role = Role("Mystic", Set(2, 3, 4, 5))
+      val Nightbringer: Role = Role("Nightbringer", Set(2, 4, 6, 8))
+      val Ranger: Role = Role("Ranger", Set(2, 4, 6))
+      val Redeemed: Role = Role("Redeemed", Set(3, 6, 9))
+      val Renewer: Role = Role("Renewer", Set(2, 4, 6))
+      val Revenant: Role = Role("Revenant", Set(2, 3, 4, 5))
+      val Sentinel: Role = Role("Sentinel", Set(3, 6, 9))
+      val Skirmisher: Role = Role("Skirmisher", Set(3, 6, 9))
+      val Spellweaver: Role = Role("Spellweaver", Set(2, 4, 6))
+      val Victorious: Role = Role("Victorious", Set(1))
+
+      val all: Set[Role] = Set(
+        Abomination,
+        Assassin,
+        Brawler,
+        Caretaker,
+        Cavalier,
+        Cannoneer,
+        Cruel,
+        Dawnbringer,
+        Draconic,
+        Forgotten,
+        Hellion,
+        Inanimate,
+        Invoker,
+        Ironclad,
+        Knight,
+        Legionnaire,
+        Mystic,
+        Nightbringer,
+        Ranger,
+        Redeemed,
+        Renewer,
+        Revenant,
+        Sentinel,
+        Skirmisher,
+        Spellweaver,
+        Victorious
+      )
+    }
+
+    object champions {
+
+      import roles._
+
+      val Aatrox: Champion = Champion("Aatrox", Set(Redeemed, Legionnaire), 1)
+      val Akshan: Champion = Champion("Akshan", Set(Sentinel, Ranger), 5)
+      val Aphelios: Champion = Champion("Aphelios", Set(Nightbringer, Ranger), 4)
+      val Ashe: Champion = Champion("Ashe", Set(Draconic, Ranger), 3)
+      val Brand: Champion = Champion("Brand", Set(Abomination, Spellweaver), 2)
+      val Diana: Champion = Champion("Diana", Set(Nightbringer, Assassin), 4)
+      val Draven: Champion = Champion("Draven", Set(Forgotten, Legionnaire), 4)
+      val Fiddlesticks: Champion = Champion("Fiddlesticks", Set(Abomination, Revenant, Mystic), 4)
+      val Galio: Champion = Champion("Galio", Set(Draconic, Sentinel, Knight), 4)
+      val Garen: Champion = Champion("Garen", Set(Victorious, Dawnbringer, Knight), 5)
+      val Gragas: Champion = Champion("Gragas", Set(Dawnbringer, Brawler), 1)
+      val Gwen: Champion = Champion("Gwen", Set(Inanimate, Mystic), 5)
+      val Hecarim: Champion = Champion("Hecarim", Set(Forgotten, Cavalier), 2)
+      val Heimerdinger: Champion = Champion("Heimerdinger", Set(Draconic, Renewer, Caretaker), 5)
+      val Ivern: Champion = Champion("Ivern", Set(Revenant, Invoker, Renewer), 4)
+      val Irelia: Champion = Champion("Irelia", Set(Sentinel, Skirmisher, Legionnaire), 2)
+      val Jax: Champion = Champion("Jax", Set(Ironclad, Skirmisher), 4)
+      val Kalista: Champion = Champion("Kalista", Set(Abomination, Legionnaire), 1)
+      val Karma: Champion = Champion("Karma", Set(Dawnbringer, Invoker), 4)
+      val Kayle: Champion = Champion("Kayle", Set(Redeemed, Legionnaire), 5)
+      val Kennen: Champion = Champion("Kennen", Set(Hellion, Skirmisher), 2)
+      val KhaZix: Champion = Champion("Kha'Zix", Set(Dawnbringer, Assassin), 1)
+      val Kled: Champion = Champion("Kled", Set(Hellion, Cavalier), 1)
+      val LeeSin: Champion = Champion("Lee Sin", Set(Nightbringer, Skirmisher), 3)
+      val Leona: Champion = Champion("Leona", Set(Redeemed, Knight), 1)
+      val Lucian: Champion = Champion("Lucian", Set(Sentinel, Cannoneer), 4)
+      val Lulu: Champion = Champion("Lulu", Set(Hellion, Mystic), 3)
+      val Lux: Champion = Champion("Lux", Set(Redeemed, Mystic), 3)
+      val MissFortune: Champion = Champion("Miss Fortune", Set(Forgotten, Cannoneer), 3)
+      val Nautilus: Champion = Champion("Nautilus", Set(Ironclad, Knight), 2)
+      val Nidalee: Champion = Champion("Nidalee", Set(Dawnbringer, Skirmisher), 3)
+      val Nocturne: Champion = Champion("Nocturne", Set(Revenant, Assassin), 3)
+      val Nunu: Champion = Champion("Nunu", Set(Abomination, Brawler), 3)
+      val Olaf: Champion = Champion("Olaf", Set(Sentinel, Skirmisher), 1)
+      val Poppy: Champion = Champion("Poppy", Set(Hellion, Knight), 1)
+      val Pyke: Champion = Champion("Pyke", Set(Sentinel, Assassin), 2)
+      val Rakan: Champion = Champion("Rakan", Set(Sentinel, Renewer), 3)
+      val Rell: Champion = Champion("Rell", Set(Redeemed, Ironclad, Cavalier), 4)
+      val Riven: Champion = Champion("Riven", Set(Dawnbringer, Legionnaire), 3)
+      val Sejuani: Champion = Champion("Sejuani", Set(Brawler, Nightbringer, Cavalier), 2)
+      val Senna: Champion = Champion("Senna", Set(Sentinel, Cannoneer), 1)
+      val Sett: Champion = Champion("Sett", Set(Draconic, Brawler), 2)
+      val Soraka: Champion = Champion("Soraka", Set(Dawnbringer, Renewer), 2)
+      val Syndra: Champion = Champion("Syndra", Set(Redeemed, Invoker), 2)
+      val Teemo: Champion = Champion("Teemo", Set(Cruel, Hellion, Invoker), 5)
+      val Thresh: Champion = Champion("Thresh", Set(Forgotten, Knight), 2)
+      val Tristana: Champion = Champion("Tristana", Set(Hellion, Cannoneer), 2)
+      val Udyr: Champion = Champion("Udyr", Set(Draconic, Skirmisher), 1)
+      val Varus: Champion = Champion("Varus", Set(Redeemed, Ranger), 2)
+      val Vayne: Champion = Champion("Vayne", Set(Forgotten, Ranger), 1)
+      val VelKoz: Champion = Champion("Vel'Koz", Set(Redeemed, Spellweaver), 4)
+      val Viego: Champion = Champion("Viego", Set(Forgotten, Skirmisher, Assassin), 5)
+      val Vladimir: Champion = Champion("Vladimir", Set(Nightbringer, Renewer), 1)
+      val Volibear: Champion = Champion("Volibear", Set(Revenant, Brawler), 5)
+      val Yasuo: Champion = Champion("Yasuo", Set(Nightbringer, Legionnaire), 3)
+      val Ziggs: Champion = Champion("Ziggs", Set(Hellion, Spellweaver), 1)
+      val Zyra: Champion = Champion("Zyra", Set(Draconic, Spellweaver), 3)
+
+      val all: Set[Champion] = Set(
+        Aatrox,
+        Akshan,
+        Aphelios,
+        Ashe,
+        Brand,
+        Diana,
+        Draven,
+        Fiddlesticks,
+        Galio,
+        Garen,
+        Gragas,
+        Gwen,
+        Hecarim,
+        Heimerdinger,
+        Ivern,
+        Irelia,
+        Jax,
+        Kalista,
+        Karma,
+        Kayle,
+        Kennen,
+        KhaZix,
+        Kled,
+        LeeSin,
+        Leona,
+        Lucian,
+        Lulu,
+        Lux,
+        MissFortune,
+        Nautilus,
+        Nidalee,
+        Nocturne,
+        Nunu,
+        Olaf,
+        Poppy,
+        Pyke,
+        Rakan,
+        Rell,
+        Riven,
+        Sejuani,
+        Senna,
+        Sett,
+        Soraka,
+        Syndra,
+        Teemo,
+        Thresh,
+        Tristana,
+        Udyr,
+        Varus,
+        Vayne,
+        VelKoz,
+        Viego,
+        Vladimir,
+        Volibear,
+        Yasuo,
+        Ziggs,
+        Zyra
+      )
+    }
+
+  }
+
   object set3_5 {
 
     object roles {
@@ -348,6 +537,6 @@ object data {
     }
   }
 
-  val CurrentSet: set3_5.type = set3_5
+  val CurrentSet: set5_5.type = set5_5
 
 }

@@ -20,32 +20,37 @@ object ChampionComposition {
     def go(thresholds: (Int, Color)*): Option[Color] = thresholds.sortBy(-_._1).find(count >= _._1).map(_._2)
     import Color._
     import tftcomps.domain.data.CurrentSet.roles._
+
+    // generate this from the official data (https://developer.riotgames.com/docs/tft#static-data_current-set) using
+    // jq -r '.[] | "case \(.name) => go(\(.sets | map("\(.min) -> \(.style[0:1] | ascii_upcase)\(.style[1:])") | join(", ")))"' traits.json
     role match {
-      case Astro         => go(3 -> Gold)
-      case Battlecast    => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
-      case Blademaster   => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
-      case Blaster       => go(2 -> Bronze, 4 -> Gold)
-      case Brawler       => go(2 -> Bronze, 4 -> Gold)
-      case Celestial     => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case Chrono        => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
-      case Cybernetic    => go(3 -> Bronze, 6 -> Gold)
-      case DarkStar      => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
-      case Demolitionist => go(2 -> Gold)
-      case Infiltrator   => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case ManaReaver    => go(2 -> Gold)
-      case MechPilot     => go(3 -> Gold)
-      case Mercenary     => go(1 -> Gold)
-      case Mystic        => go(2 -> Bronze, 4 -> Gold)
-      case Paragon       => go(1 -> Gold)
-      case Protector     => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case Rebel         => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
-      case Sniper        => go(2 -> Bronze, 4 -> Gold)
-      case Sorcerer      => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
-      case SpacePirate   => go(2 -> Bronze, 4 -> Gold)
-      case StarGuardian  => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
-      case Starship      => go(1 -> Gold)
-      case Vanguard      => go(2 -> Bronze, 4 -> Gold)
-      case _             => None
+      case Abomination  => go(3 -> Silver, 4 -> Gold, 5 -> Chromatic)
+      case Assassin     => go(2 -> Bronze, 4 -> Silver, 6 -> Gold)
+      case Brawler      => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Caretaker    => go(1 -> Gold)
+      case Cavalier     => go(2 -> Bronze, 3 -> Silver, 4 -> Gold)
+      case Cannoneer    => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Cruel        => go(1 -> Gold)
+      case Dawnbringer  => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
+      case Draconic     => go(3 -> Bronze, 5 -> Gold)
+      case Forgotten    => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
+      case Hellion      => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
+      case Inanimate    => go(1 -> Gold)
+      case Invoker      => go(2 -> Bronze, 4 -> Gold)
+      case Ironclad     => go(2 -> Bronze, 3 -> Gold, 4 -> Chromatic)
+      case Knight       => go(2 -> Bronze, 4 -> Silver, 6 -> Gold)
+      case Legionnaire  => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
+      case Mystic       => go(2 -> Bronze, 3 -> Silver, 4 -> Gold, 5 -> Chromatic)
+      case Nightbringer => go(2 -> Bronze, 4 -> Silver, 6 -> Silver, 8 -> Gold)
+      case Ranger       => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Redeemed     => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
+      case Renewer      => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Revenant     => go(2 -> Bronze, 3 -> Silver, 4 -> Gold, 5 -> Chromatic)
+      case Sentinel     => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
+      case Skirmisher   => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
+      case Spellweaver  => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Victorious   => go(1 -> Gold)
+      case _            => None
     }
   }
 
@@ -86,7 +91,10 @@ object ChampionComposition {
               ^.paddingLeft := 0.rem,
               champion.roles.toSeq
                 .sortBy(_.name)
-                .toTagMod(role => <.li(^.className := Set("role", role.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "), ^.listStyle := "none", role.name))
+                .toTagMod(role =>
+                  <.li(^.className := Set("role", role.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
+                       ^.listStyle := "none",
+                       role.name))
             )
           )
         }
