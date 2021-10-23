@@ -1,4 +1,8 @@
-$fgColor: #dedede;
+$primaryBlue: #1bbae2;
+$primaryGold: #dcab06;
+
+$darkText: #111;
+$lightText: #eee;
 
 $bronze: #C68A6B;
 $silver: #BDDBDE;
@@ -29,20 +33,29 @@ $chromatic: conic-gradient(
 );
 $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "chromatic": $chromatic);
 
+
 html {
-  background:
-    linear-gradient(0deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
-    linear-gradient(0deg, rgba(255, 0, 150, 0.7), rgba(255, 0, 150, 0.3)),
-    url("images/background.jpg");
-  background-size: cover;
+  background: linear-gradient(to bottom right, rgba($primaryBlue, 0.05) 0%, rgba($primaryBlue, 0.1) 100%);
   min-height: 100%;
-  color: $fgColor;
+  color: $darkText;
   font-family: Calibri;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: Candara;
   font-family: Corbel;
+}
+
+h1 {
+  color: $primaryGold;
+  -webkit-text-stroke-width: 0.5px;
+  -webkit-text-stroke-color: black;
+  font-size: 64px;
+  background: left center / 128px url("favicon.png") no-repeat;
+  padding-left: 128px;
+  line-height: 128px;
+  margin-top: 0;
+  margin-bottom: 0.25em;
 }
 
 .composition {
@@ -80,8 +93,9 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
     top: -0.5rem;
     left: -3.75rem;
-    background: #716969;
+    background: $primaryBlue;
     text-shadow: 1px 1px black;
+    color: $lightText;
 
     small {
       display: none;
@@ -100,7 +114,8 @@ h1, h2, h3, h4, h5, h6 {
 
     border: 1px solid black;
     border-radius: 0.5rem;
-    background: #291d1b;
+    background: scale-color($primaryBlue, $lightness: 70%);
+    color: $darkText;
 
     &:not(:hover) .role {
 
@@ -117,7 +132,7 @@ h1, h2, h3, h4, h5, h6 {
             font-size: 16px;
             display: block;
             margin: -1rem 0 0 40px;
-            color: $fgColor;
+            color: $darkText;
             -webkit-text-stroke-width: 0;
           }
         }
@@ -207,7 +222,7 @@ h1, h2, h3, h4, h5, h6 {
       }
 
       .name, .champion-roles {
-        color: #eee;
+        color: $lightText;
         background: #222;
         margin: 0;
         line-height: 40px;

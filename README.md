@@ -45,10 +45,10 @@ Checkout the `gh-pages` branch.
 ```shell script
 rm -r images
 cp -r application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-opt-bundle.js \
-  application/target/web/sass/main/{images,styles.css} \
+  application/target/web/sass/main/{images,favicon.png,styles.css} \
   webworker/target/scala-2.13/tft-comps-webworker-opt.js \
   .
-git add images styles.css tft-comps-application-opt-bundle.js tft-comps-webworker-opt.js
+git add images favicon.png styles.css tft-comps-application-opt-bundle.js tft-comps-webworker-opt.js
 ```
 
 Then commit and push the changes and that's it.

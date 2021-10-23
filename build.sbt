@@ -42,11 +42,10 @@ lazy val application = project
     npmDependencies in Compile ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1"),
     sourceDirectory in Assets := file("application/src/main/resources"),
     copyAssetsToTargetDirectory := {
-      println("Copying CSS to resources...")
-      val source = file("application/src/main/resources/images")
-      val target = file("application/target/web/sass/main/images")
+      println("Copying CSS assets to resources...")
+      val source = file("application/src/main/resources")
+      val target = file("application/target/web/sass/main")
       IO.copyDirectory(source, target)
-      println("Done")
     },
     compile in Compile := {
       val x = (compile in Compile).value
