@@ -2,7 +2,7 @@ package tftcomps.application
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, ScalaFnComponent}
-import tftcomps.domain.{CompositionConfig, Role}
+import tftcomps.domain.{Champion, CompositionConfig, Role}
 
 object CompositionForm {
   final case class Props(compositionConfig: CompositionConfig, onCompositionConfigChange: CompositionConfig => Callback)
@@ -29,8 +29,9 @@ object CompositionForm {
       maybeExplanation
     )
 
-    def checkboxSet[A](title: String, possibleValues: Set[A], selectedValues: Set[A])(stringProjection: A => String)(
-        onChange: Set[A] => Callback) = <.div(
+    def requiredChampionsField(title: String, possibleValues: Set[Champion], selectedValues: Set[Champion])(
+        onChange: Set[Champion] => Callback) = <.div(
+      ^.className := "champion-filter",
       ^.marginBottom := 0.5.rem,
       ^.display := "flex",
       <.div(^.width := 10.rem, s"$title:"),
@@ -39,26 +40,30 @@ object CompositionForm {
         ^.columnCount := "9",
         ^.columnGap := 0.rem,
         possibleValues.toSeq
-          .sortBy(stringProjection)
-          .toTagMod { value =>
-            val isSelected = selectedValues.contains(value)
+          .sortBy(_.name)
+          .toTagMod { champion =>
+            val isSelected = selectedValues.contains(champion)
             <.label(
               ^.display := "block",
+              ^.className := "champion",
+              ^.className := champion.name.toLowerCase.replaceAll("[^a-z]", ""),
+              ^.className := (if (isSelected) "is-selected" else ""),
               <.input(
                 ^.`type` := "checkbox",
-                ^.value := stringProjection(value),
+                ^.value := champion.name,
                 ^.checked := isSelected,
                 ^.onChange ==> { (e: ReactEventFromInput) =>
-                  onChange(if (e.target.checked) selectedValues + value else selectedValues - value)
+                  onChange(if (e.target.checked) selectedValues + champion else selectedValues - champion)
                 }
               ),
-              <.span(^.fontWeight := (if (isSelected) "bold" else "normal"), stringProjection(value))
+              <.span(^.fontWeight := (if (isSelected) "bold" else "normal"), champion.name)
             )
           }
       )
     )
 
     def requiredRolesField(title: String, values: Map[Role, Int])(onChange: Map[Role, Int] => Callback) = <.div(
+      ^.className := "role-filter",
       ^.marginBottom := 0.5.rem,
       ^.display := "flex",
       <.div(^.width := 10.rem, s"$title:"),
@@ -72,6 +77,9 @@ object CompositionForm {
             case (role, count) =>
               val isChanged = count > 0
               <.div(
+                ^.className := "role",
+                ^.className := role.name.toLowerCase.replaceAll("[^a-z]", ""),
+                ^.className := (if (isChanged) "is-changed" else ""),
                 ^.pageBreakInside := "avoid",
                 ^.marginBottom := 0.5.rem,
                 <.label(
@@ -83,14 +91,15 @@ object CompositionForm {
                     ^.width := "100%",
                     ^.display := "block",
                     ^.`type` := "range",
+                    ^.list := s"${role.name}-thresholds",
                     ^.min := 0,
                     ^.max := role.stackingBonusThresholds.max,
-                    ^.step := role.stackingBonusThresholds.tail.headOption
-                      .map(_ - role.stackingBonusThresholds.head)
-                      .getOrElse(role.stackingBonusThresholds.last),
                     ^.value := count,
                     ^.onChange ==> ((e: ReactEventFromInput) => onChange(values.updated(role, e.target.value.toInt)))
-                  )
+                  ),
+                  <.datalist(
+                    ^.id := s"${role.name}-thresholds",
+                    (0 +: role.stackingBonusThresholds.toSeq.sorted).toTagMod(i => <.option(^.value := i.toString)))
                 )
               )
           }
@@ -104,9 +113,9 @@ object CompositionForm {
         props.onCompositionConfigChange(props.compositionConfig.copy(maxChampionCost = x))),
       requiredRolesField("Required Traits", props.compositionConfig.requiredRoles)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(requiredRoles = x))),
-      checkboxSet("Required Champions",
-                  tftcomps.domain.data.CurrentSet.champions.all,
-                  props.compositionConfig.requiredChampions)(_.name)(x =>
+      requiredChampionsField("Required Champions",
+                             tftcomps.domain.data.CurrentSet.champions.all,
+                             props.compositionConfig.requiredChampions)(x =>
         props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),
       numberSlider(
         "Search thoroughness",

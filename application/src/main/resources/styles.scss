@@ -51,11 +51,56 @@ h1 {
   -webkit-text-stroke-width: 0.5px;
   -webkit-text-stroke-color: black;
   font-size: 64px;
-  background: left center / 128px url("favicon.png") no-repeat;
+  background: left center / 128px 128px url("favicon.png") no-repeat;
   padding-left: 128px;
   line-height: 128px;
   margin-top: 0;
   margin-bottom: 0.25em;
+}
+
+.role-filter {
+  .role {
+    width: 9rem;
+    white-space: nowrap;
+
+    label {
+      background: left center / 2rem 2rem url("") no-repeat;
+      padding-left: 2.3rem;
+    }
+
+    @each $role in abomination, assassin, brawler, cannoneer, caretaker, cavalier, cruel, dawnbringer, draconic, forgotten, hellion, inanimate, invoker, ironclad, knight, legionnaire, mystic, nightbringer, ranger, redeemed, renewer, revenant, sentinel, skirmisher, spellweaver, victorious {
+      &.#{$role} label {
+        background-image: url("images/traits/#{$role}.svg");
+      }
+    }
+
+    &.is-changed, &:hover {
+      text-shadow: 0px 0px 5px $primaryGold;
+    }
+  }
+}
+
+.champion-filter {
+  .champion {
+    input {
+      display: none;
+    }
+
+    background: left center / 2rem 2rem url("") no-repeat;
+    padding-left: 2.3rem;
+    line-height: 2rem;
+    margin-bottom: 2px;
+
+    @each $champion in aatrox, akshan, aphelios, ashe, brand, diana, draven, fiddlesticks, galio, garen, gragas, gwen, hecarim, heimerdinger, irelia, ivern, jax, kalista, karma, kayle, kennen, khazix, kled, leesin, leona, lucian, lulu, lux, missfortune, nautilus, nidalee, nocturne, nunu, olaf, poppy, pyke, rakan, rell, riven, sejuani, senna, sett, soraka, syndra, teemo, thresh, tristana, udyr, varus, vayne, velkoz, viego, vladimir, volibear, yasuo, ziggs, zyra {
+      &.#{$champion} {
+        background-image: url("images/champion-icons/#{$champion}.png");
+      }
+    }
+
+  &.is-selected, &:hover {
+    text-shadow: 0px 0px 5px $primaryGold;
+  }
+  }
 }
 
 .composition {
