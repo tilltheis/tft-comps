@@ -7,8 +7,7 @@ $lightText: #eee;
 $bronze: #C68A6B;
 $silver: #BDDBDE;
 $gold: #EFD377;
-$dirt: #716969;
-$gray: #2e2c2c;
+$dirt: #918888;
 
 $chromatic-desaturation-amount: 50%;
 $chromatic: conic-gradient(
@@ -64,7 +63,7 @@ h1 {
     white-space: nowrap;
 
     label {
-      background: left center / 2rem 2rem url("") no-repeat;
+      background: left center / 2rem no-repeat;
       padding-left: 2.3rem;
     }
 
@@ -86,7 +85,7 @@ h1 {
       display: none;
     }
 
-    background: left center / 2rem 2rem url("") no-repeat;
+    background: left center / 2rem no-repeat;
     padding-left: 2.3rem;
     line-height: 2rem;
     margin-bottom: 2px;
@@ -195,7 +194,7 @@ h1 {
 
       &:before {
         content: "⬢";
-        font-size: 40px;
+        font-size: 43px;
         -webkit-text-stroke: 3px black;
         text-indent: 0;
         color: $dirt;
@@ -213,20 +212,18 @@ h1 {
       &:after {
         content: ' ';
         font-size: 40px;
-        $size: 34px;
-        background-size: $size $size;
-        background-position: 0px 2px;
+        background: center / 16px no-repeat;
         width: 40px;
         height: 40px;
         line-height: 40px;
 
         position: absolute;
-        left: 0;
+        left: -2px;
       }
 
-      @each $role in astro, battlecast, blademaster, blaster, brawler, celestial, chrono, cybernetic, darkstar, demolitionist, infiltrator, manareaver, mechpilot, mercenary, mystic, paragon, protector, rebel, sniper, sorcerer, spacepirate, starguardian, starship, vanguard {
+      @each $role in abomination, assassin, brawler, cannoneer, caretaker, cavalier, cruel, dawnbringer, draconic, forgotten, hellion, inanimate, invoker, ironclad, knight, legionnaire, mystic, nightbringer, ranger, redeemed, renewer, revenant, sentinel, skirmisher, spellweaver, victorious {
         &.#{$role}:after {
-          background-image: url("images/traits/#{$role}.png");
+          background-image: url("images/traits/#{$role}.svg");
         }
       }
 
@@ -259,10 +256,11 @@ h1 {
       border: 1px solid black;
       border-radius: 0.5rem;
 
-      @each $champion in ahri, annie, ashe, aurelionsol, bard, blitzcrank, caitlyn, cassiopeia, darius, ekko, ezreal, fiora, fizz, gangplank, gnar, graves, illaoi, irelia, janna, jarvaniv, jayce, jhin, jinx, karma, kogmaw, leona, lucian, lulu, malphite, masteryi, mordekaiser, nautilus, neeko, nocturne, poppy, rakan, riven, rumble, shaco, shen, soraka, syndra, teemo, thresh, twistedfate, urgot, vayne, vi, viktor, wukong, xayah, xerath, xinzhao, yasuo, zed, ziggs, zoe {
+      background: top left / 10.1rem url("") no-repeat;
+
+      @each $champion in aatrox, akshan, aphelios, ashe, brand, diana, draven, fiddlesticks, galio, garen, gragas, gwen, hecarim, heimerdinger, irelia, ivern, jax, kalista, karma, kayle, kennen, khazix, kled, leesin, leona, lucian, lulu, lux, missfortune, nautilus, nidalee, nocturne, nunu, olaf, poppy, pyke, rakan, rell, riven, sejuani, senna, sett, soraka, syndra, teemo, thresh, tristana, udyr, varus, vayne, velkoz, viego, vladimir, volibear, yasuo, ziggs, zyra {
         &.#{$champion} {
-          background-image: url("images/champions/#{$champion}.jpg");
-          background-size: cover;
+          background-image: url("images/champion-icons/#{$champion}.png");
         }
       }
 
@@ -305,7 +303,7 @@ h1 {
             font-size: 40px;
             -webkit-text-stroke: 2px #555;
             text-indent: 0;
-            color: $gray;
+            color: #2e2c2c;
 
             width: 40px;
             height: 40px;
@@ -320,21 +318,19 @@ h1 {
           &:after {
             content: ' ';
             font-size: 40px;
-            $size: 34px;
-            background-size: $size $size;
-            background-position: 0px 2px;
+            background: center / 16px no-repeat;
             filter: invert(1);
             width: 40px;
             height: 40px;
             line-height: 40px;
 
             position: absolute;
-            left: 0;
+            left: -3px;
           }
 
-          @each $role in astro, battlecast, blademaster, blaster, brawler, celestial, chrono, cybernetic, darkstar, demolitionist, infiltrator, manareaver, mechpilot, mercenary, mystic, paragon, protector, rebel, sniper, sorcerer, spacepirate, starguardian, starship, vanguard {
+          @each $role in abomination, assassin, brawler, cannoneer, caretaker, cavalier, cruel, dawnbringer, draconic, forgotten, hellion, inanimate, invoker, ironclad, knight, legionnaire, mystic, nightbringer, ranger, redeemed, renewer, revenant, sentinel, skirmisher, spellweaver, victorious {
             &.#{$role}:after {
-              background-image: url("images/traits/#{$role}.png");
+              background-image: url("images/traits/#{$role}.svg");
             }
           }
         }
