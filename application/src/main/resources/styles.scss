@@ -32,6 +32,10 @@ $chromatic: conic-gradient(
 );
 $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "chromatic": $chromatic);
 
+$roles: abomination assassin brawler cannoneer caretaker cavalier cruel dawnbringer draconic forgotten hellion inanimate invoker ironclad knight legionnaire mystic nightbringer ranger redeemed renewer revenant sentinel skirmisher spellweaver victorious;
+$champions: aatrox akshan aphelios ashe brand diana draven fiddlesticks galio garen gragas gwen hecarim heimerdinger irelia ivern jax kalista karma kayle kennen khazix kled leesin leona lucian lulu lux missfortune nautilus nidalee nocturne nunu olaf poppy pyke rakan rell riven sejuani senna sett soraka syndra teemo thresh tristana udyr varus vayne velkoz viego vladimir volibear yasuo ziggs zyra;
+
+
 
 html {
   background: linear-gradient(to bottom right, rgba($primaryBlue, 0.05) 0%, rgba($primaryBlue, 0.1) 100%);
@@ -85,20 +89,22 @@ h1 {
       display: none;
     }
 
-    background: left center / 2rem no-repeat;
+    background: left center / 2rem url("champions.png") no-repeat;
     padding-left: 2.3rem;
     line-height: 2rem;
     margin-bottom: 2px;
 
-    @each $champion in aatrox, akshan, aphelios, ashe, brand, diana, draven, fiddlesticks, galio, garen, gragas, gwen, hecarim, heimerdinger, irelia, ivern, jax, kalista, karma, kayle, kennen, khazix, kled, leesin, leona, lucian, lulu, lux, missfortune, nautilus, nidalee, nocturne, nunu, olaf, poppy, pyke, rakan, rell, riven, sejuani, senna, sett, soraka, syndra, teemo, thresh, tristana, udyr, varus, vayne, velkoz, viego, vladimir, volibear, yasuo, ziggs, zyra {
+    @for $i from 1 through length($champions) {
+      $champion: nth($champions, $i);
+
       &.#{$champion} {
-        background-image: url("images/champion-icons/#{$champion}.png");
+        background-position: 0 (-2rem * ($i - 1));
       }
     }
 
-  &.is-selected, &:hover {
-    text-shadow: 0px 0px 5px $primaryGold;
-  }
+    &.is-selected, &:hover {
+      text-shadow: 0px 0px 5px $primaryGold;
+    }
   }
 }
 
@@ -256,11 +262,13 @@ h1 {
       border: 1px solid black;
       border-radius: 0.5rem;
 
-      background: top left / 10.1rem url("") no-repeat;
+      background: top left / 10.1rem url("champions.png") no-repeat;
 
-      @each $champion in aatrox, akshan, aphelios, ashe, brand, diana, draven, fiddlesticks, galio, garen, gragas, gwen, hecarim, heimerdinger, irelia, ivern, jax, kalista, karma, kayle, kennen, khazix, kled, leesin, leona, lucian, lulu, lux, missfortune, nautilus, nidalee, nocturne, nunu, olaf, poppy, pyke, rakan, rell, riven, sejuani, senna, sett, soraka, syndra, teemo, thresh, tristana, udyr, varus, vayne, velkoz, viego, vladimir, volibear, yasuo, ziggs, zyra {
+      @for $i from 1 through length($champions) {
+        $champion: nth($champions, $i);
+
         &.#{$champion} {
-          background-image: url("images/champion-icons/#{$champion}.png");
+          background-position: 0 (-10.1rem * ($i - 1));
         }
       }
 
