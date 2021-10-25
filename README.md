@@ -56,4 +56,5 @@ Then commit and push the changes and that's it.
 
 ## Set Update
 
-Generate new champion image sprite using ImageMagick via `convert path-to-champion-images/*.png -append application/src/main/resources/champions.png`
+Generate new champion image sprite by using ImageMagick via `convert path-to-champion-images/*.png -append application/src/main/resources/champions.png`
+Generate new trait image sprite by using https://svgsprit.es/

@@ -66,15 +66,20 @@ h1 {
     width: 9rem;
     white-space: nowrap;
 
-    label {
-      background: left center / 2rem no-repeat;
-      padding-left: 2.3rem;
+    position: relative;
+
+    svg {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translate(0, -50%);
+
+      width: 2rem;
+      height: 2rem;
     }
 
-    @each $role in abomination, assassin, brawler, cannoneer, caretaker, cavalier, cruel, dawnbringer, draconic, forgotten, hellion, inanimate, invoker, ironclad, knight, legionnaire, mystic, nightbringer, ranger, redeemed, renewer, revenant, sentinel, skirmisher, spellweaver, victorious {
-      &.#{$role} label {
-        background-image: url("images/traits/#{$role}.svg");
-      }
+    label {
+      padding-left: 2.3rem;
     }
 
     &.is-changed, &:hover {
