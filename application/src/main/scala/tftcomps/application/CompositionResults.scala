@@ -2,11 +2,11 @@ package tftcomps.application
 
 import japgolly.scalajs.react.{React, ScalaFnComponent}
 import japgolly.scalajs.react.vdom.html_<^._
-import tftcomps.domain.Composition
+import tftcomps.domain.{Composition, CompositionConfig}
 
 object CompositionResults {
 
-  final case class Props(compositions: Seq[Composition], searchResultCount: Int)
+  final case class Props(compositions: Seq[Composition], searchResultCount: Int, compositionConfig: CompositionConfig)
 
   val Component = ScalaFnComponent[Props] { props =>
     if (props.compositions.isEmpty) <.p(s"No results from ${props.searchResultCount}/500 searches.")
@@ -38,7 +38,7 @@ object CompositionResults {
                 ^.key := composition.champions.hashCode,
                 ^.marginBottom := 1.rem,
                 ^.height := 20.rem,
-                ChampionComposition(composition, composition.synergyPercentage)
+                ChampionComposition(composition, composition.synergyPercentage, props.compositionConfig)
               )
             }
         )
@@ -46,5 +46,6 @@ object CompositionResults {
     }
   }
 
-  def apply(compositions: Seq[Composition], searchResultCount: Int) = Component(Props(compositions, searchResultCount))
+  def apply(compositions: Seq[Composition], searchResultCount: Int, compositionConfig: CompositionConfig) =
+    Component(Props(compositions, searchResultCount, compositionConfig))
 }

@@ -3,11 +3,11 @@ package tftcomps.application
 import japgolly.scalajs.react.ScalaFnComponent
 import japgolly.scalajs.react.vdom.Attr
 import japgolly.scalajs.react.vdom.html_<^._
-import tftcomps.domain.{Composition, Role}
+import tftcomps.domain.{Composition, CompositionConfig, Role}
 
 object ChampionComposition {
 
-  final case class Props(composition: Composition, quality: Double)
+  final case class Props(composition: Composition, quality: Double, compositionConfig: CompositionConfig)
 
   sealed abstract class Color(val value: String)
   object Color {
@@ -85,6 +85,7 @@ object ChampionComposition {
         props.composition.champions.toSeq.sortBy(_.name).toTagMod { champion =>
           <.li(
             ^.className := Set("champion", champion.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
+            ^.className := (if (props.compositionConfig.requiredChampions.contains(champion)) "is-required" else ""),
             <.h3(^.className := "name", champion.name),
             <.ul(
               ^.className := "champion-roles",
@@ -92,9 +93,14 @@ object ChampionComposition {
               champion.roles.toSeq
                 .sortBy(_.name)
                 .toTagMod(role =>
-                  <.li(^.className := Set("role", role.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
-                       ^.listStyle := "none",
-                       role.name))
+                  <.li(
+                    ^.className := Set("role", role.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
+                    ^.className := (if (props.compositionConfig.requiredRoles.filter(_._2 > 0).keySet.contains(role))
+                                      "is-required"
+                                    else ""),
+                    ^.listStyle := "none",
+                    role.name
+                ))
             )
           )
         }
@@ -102,5 +108,6 @@ object ChampionComposition {
     )
   }
 
-  def apply(composition: Composition, quality: Double) = Component(Props(composition, quality))
+  def apply(composition: Composition, quality: Double, compositionConfig: CompositionConfig) =
+    Component(Props(composition, quality, compositionConfig))
 }

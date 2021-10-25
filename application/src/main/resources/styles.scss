@@ -281,6 +281,11 @@ h1 {
         margin-top: 10.1rem;
       }
 
+      &.is-required .name {
+        text-shadow: 0px 0px 5px $primaryGold;
+        font-size: 24px;
+      }
+
       .champion-roles {
         height: 100%;
         flex-direction: column;
@@ -295,6 +300,15 @@ h1 {
           height: 40px;
           line-height: 40px;
           margin-left: 1rem;
+
+          &.is-required {
+            text-shadow: 0px 0px 5px #dcab06;
+            font-weight: bold;
+
+            &:before {
+              filter: drop-shadow(0px 0px 5px scale-color($primaryGold, $alpha: -30%));
+            }
+          }
 
           &:before {
             content: ' ';
