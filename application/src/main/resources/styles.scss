@@ -68,18 +68,15 @@ h1 {
 
     position: relative;
 
-    svg {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translate(0, -50%);
-
-      width: 2rem;
-      height: 2rem;
+    label {
+      background: left center / 2rem 2rem no-repeat;
+      padding-left: 2.3rem;
     }
 
-    label {
-      padding-left: 2.3rem;
+    @each $role in $roles {
+      &.#{$role} label {
+        background-image: url("traits.svg#use-#{$role}");
+      }
     }
 
     &.is-changed, &:hover {

@@ -1,7 +1,6 @@
 package tftcomps.application
 
 import japgolly.scalajs.react.vdom.html_<^._
-import japgolly.scalajs.react.vdom.svg_<^
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, ScalaFnComponent}
 import tftcomps.domain.{Champion, CompositionConfig, Role}
 
@@ -85,8 +84,6 @@ object CompositionForm {
                 ^.marginBottom := 0.5.rem,
                 <.label(
                   ^.display := "block",
-                  svg_<^.<.svg(svg_<^.<.use(
-                    svg_<^.^.xlinkHref := s"traits.svg#${role.name.toLowerCase.replaceAll("[^a-z]", "")}")),
                   <.div(^.fontWeight := (if (isChanged) "bold" else "normal"),
                         s"$count/${role.stackingBonusThresholds.max} ${role.name}"),
                   <.input(
