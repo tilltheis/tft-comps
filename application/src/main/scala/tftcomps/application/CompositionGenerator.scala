@@ -53,7 +53,7 @@ object CompositionGenerator {
 
     def render(state: State): VdomNode = {
       <.div(
-        <.h1("TFT Team Composition Generator for Set 3.5"),
+        <.h1("TFT Team Composition Generator for Set 5.5"),
         CompositionForm(state.compositionConfig, handleCompositionConfigChange),
         CompositionResults(state.compositions, state.searchResultCount, state.compositionConfig)
       )
