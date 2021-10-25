@@ -47,7 +47,7 @@ object CompositionForm {
               ^.display := "block",
               ^.className := "champion",
               ^.className := champion.name.toLowerCase.replaceAll("[^a-z]", ""),
-              ^.className := (if (isSelected) "is-selected" else ""),
+              ^.classSet("is-selected" -> isSelected),
               <.input(
                 ^.`type` := "checkbox",
                 ^.value := champion.name,

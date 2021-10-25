@@ -72,9 +72,9 @@ object ChampionComposition {
           .toTagMod {
             case (role, count) =>
               <.li(
-                ^.className := Set("role",
-                                   role.name.toLowerCase.replaceAll("[^a-z]", ""),
-                                   roleStackColor(role, count).map(_.value).getOrElse("")).mkString(" "),
+                ^.className := "role",
+                ^.className := role.name.toLowerCase.replaceAll("[^a-z]", ""),
+                ^.className := roleStackColor(role, count).map(_.value).getOrElse(""),
                 Attr[String]("data-name") := s"$count ${role.name}",
                 s"$count ${role.name}"
               )
@@ -84,8 +84,9 @@ object ChampionComposition {
         ^.className := "champions",
         props.composition.champions.toSeq.sortBy(_.name).toTagMod { champion =>
           <.li(
-            ^.className := Set("champion", champion.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
-            ^.className := (if (props.compositionConfig.requiredChampions.contains(champion)) "is-required" else ""),
+            ^.className := "champion",
+            ^.className := champion.name.toLowerCase.replaceAll("[^a-z]", ""),
+            ^.classSet("is-required" -> props.compositionConfig.requiredChampions.contains(champion)),
             <.h3(^.className := "name", champion.name),
             <.ul(
               ^.className := "champion-roles",
@@ -94,10 +95,10 @@ object ChampionComposition {
                 .sortBy(_.name)
                 .toTagMod(role =>
                   <.li(
-                    ^.className := Set("role", role.name.toLowerCase.replaceAll("[^a-z]", "")).mkString(" "),
-                    ^.className := (if (props.compositionConfig.requiredRoles.filter(_._2 > 0).keySet.contains(role))
-                                      "is-required"
-                                    else ""),
+                    ^.className := "role",
+                    ^.className := role.name.toLowerCase.replaceAll("[^a-z]", ""),
+                    ^.classSet(
+                      "is-required" -> props.compositionConfig.requiredRoles.filter(_._2 > 0).keySet.contains(role)),
                     ^.listStyle := "none",
                     role.name
                 ))
