@@ -90,7 +90,6 @@ object ChampionComposition {
             <.h3(^.className := "name", champion.name),
             <.ul(
               ^.className := "champion-roles",
-              ^.paddingLeft := 0.rem,
               champion.roles.toSeq
                 .sortBy(_.name)
                 .toTagMod(role =>
@@ -99,7 +98,6 @@ object ChampionComposition {
                     ^.className := role.name.toLowerCase.replaceAll("[^a-z]", ""),
                     ^.classSet(
                       "is-required" -> props.compositionConfig.requiredRoles.filter(_._2 > 0).keySet.contains(role)),
-                    ^.listStyle := "none",
                     role.name
                 ))
             )

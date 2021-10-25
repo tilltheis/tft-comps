@@ -30,14 +30,12 @@ object CompositionResults {
           }
         ),
         <.ol(
-          ^.listStyle := "none",
-          ^.paddingLeft := 0.rem,
+          ^.className := "compositions",
           props.compositions
             .toTagMod { composition =>
               <.li(
                 ^.key := composition.champions.hashCode,
-                ^.marginBottom := 1.rem,
-                ^.height := 20.rem,
+                ^.className := "composition-entry",
                 ChampionComposition(composition, composition.synergyPercentage, props.compositionConfig)
               )
             }
