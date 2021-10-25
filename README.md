@@ -56,5 +56,20 @@ Then commit and push the changes and that's it.
 
 ## Set Update
 
-Generate new champion image sprite by using ImageMagick via `convert path-to-champion-images/*.png -append application/src/main/resources/champions.png`
-Generate new trait image sprite by using https://svgsprit.es/
+Generate a new champion image sprite by using ImageMagick via `convert path-to-champion-images/*.png -append application/src/main/resources/champions.png`.
+
+Generate a new trait image sprite by using https://svgsprit.es/.
+It will combine the SVGs into a single file where all symbols are stripped of their `width` and `height` attributes and only contain `viewBox`es).
+Use this opening tag: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">`.
+Add `<use xlink:href="#abomination" id="use-abomination" />` for every symbol.
+Add the following style tag to the file:
+```xml
+<style type="text/css">
+  <![CDATA[
+    svg > use:not(:target) {
+      display: none;
+    }
+  ]]>
+</style>
+```
+Remove the `clip-path`s in `<g clip-path="url(#clip0)">` because they cut off some images in Chrome.

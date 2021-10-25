@@ -232,9 +232,9 @@ h1 {
         left: -2px;
       }
 
-      @each $role in abomination, assassin, brawler, cannoneer, caretaker, cavalier, cruel, dawnbringer, draconic, forgotten, hellion, inanimate, invoker, ironclad, knight, legionnaire, mystic, nightbringer, ranger, redeemed, renewer, revenant, sentinel, skirmisher, spellweaver, victorious {
+      @each $role in $roles {
         &.#{$role}:after {
-          background-image: url("images/traits/#{$role}.svg");
+          background-image: url("traits.svg#use-#{$role}");
         }
       }
 
@@ -305,45 +305,45 @@ h1 {
 
           font-size: 16px;
           color: white;
-          text-indent: 40px;
+          text-indent: 45px;
           text-align: left;
           height: 40px;
           line-height: 40px;
           margin-left: 1rem;
 
           &:before {
-            content: "⬢";
-            font-size: 40px;
-            -webkit-text-stroke: 2px #555;
+            content: ' ';
+            // hexagon
+            background: center no-repeat url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5 -5 80 90"><polygon fill="%232e2c2c" stroke="%23555" stroke-width="5" points="35 0, 70 20, 70 60, 35 80, 0 60, 0 20" /></svg>');
+
             text-indent: 0;
             color: #2e2c2c;
-
             width: 40px;
             height: 40px;
-            line-height: 40px;
 
-            display: inline-block;
-
-            margin-left: -39px;
             position: absolute;
+            top: 50%;
+            left: 0px;
+            transform: translate(0, -50%) scale(0.95);
           }
 
           &:after {
             content: ' ';
-            font-size: 40px;
-            background: center / 16px no-repeat;
+            background: center no-repeat;
             filter: invert(1);
+
             width: 40px;
             height: 40px;
-            line-height: 40px;
 
             position: absolute;
-            left: -3px;
+            left: 0px;
+            top: 50%;
+            transform: translate(0, -50%) scale(0.5);
           }
 
-          @each $role in abomination, assassin, brawler, cannoneer, caretaker, cavalier, cruel, dawnbringer, draconic, forgotten, hellion, inanimate, invoker, ironclad, knight, legionnaire, mystic, nightbringer, ranger, redeemed, renewer, revenant, sentinel, skirmisher, spellweaver, victorious {
+          @each $role in $roles {
             &.#{$role}:after {
-              background-image: url("images/traits/#{$role}.svg");
+              background-image: url("traits.svg#use-#{$role}");
             }
           }
         }
