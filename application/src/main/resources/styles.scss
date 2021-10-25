@@ -35,6 +35,11 @@ $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "c
 $roles: abomination assassin brawler cannoneer caretaker cavalier cruel dawnbringer draconic forgotten hellion inanimate invoker ironclad knight legionnaire mystic nightbringer ranger redeemed renewer revenant sentinel skirmisher spellweaver victorious;
 $champions: aatrox akshan aphelios ashe brand diana draven fiddlesticks galio garen gragas gwen hecarim heimerdinger irelia ivern jax kalista karma kayle kennen khazix kled leesin leona lucian lulu lux missfortune nautilus nidalee nocturne nunu olaf poppy pyke rakan rell riven sejuani senna sett soraka syndra teemo thresh tristana udyr varus vayne velkoz viego vladimir volibear yasuo ziggs zyra;
 
+$hexagon-mask: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 292 334" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M146.208,4.118l141.715,81.058l0,162.693l-141.715,81.347l-141.716,-81.347l0,-162.693l141.716,-81.058Z"/><path d="M146.208,4.118l141.715,81.058l0,162.693l-141.715,81.347l-141.716,-81.347l0,-162.693l141.716,-81.058Zm-0,24l120.882,69.142c-0,0 -0,138.546 -0,138.546c-0,0 -120.882,69.388 -120.882,69.388c-0,0 -120.883,-69.388 -120.883,-69.388c0,0 0,-138.546 0,-138.546l120.883,-69.142Z"/></svg>');
+@function hexagon-shape($svg-stroke-color-string) {
+  @return url('data:image/svg+xml;utf8,<svg viewBox="0 0 292 334" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path d="M145.833,0l145.834,83.112l-0,166.814l-145.834,83.407l-145.833,-83.407l-0,-166.814l145.833,-83.112Zm0,23.979l125,71.239c0,-0.001 0,142.623 0,142.623c0,0 -125,71.492 -125,71.492c0,0 -125,-71.492 -125,-71.492c0,0 0,-142.623 0,-142.623l125,-71.239Z" fill="#{$svg-stroke-color-string}"/></svg>');
+}
+
 
 
 html {
@@ -91,7 +96,7 @@ h1 {
       display: none;
     }
 
-    background: left center / 2rem url("champions.png") no-repeat;
+    background: left center / 2rem auto url("champions.png") no-repeat;
     padding-left: 2.3rem;
     line-height: 2rem;
     margin-bottom: 2px;
@@ -201,9 +206,9 @@ h1 {
 
       &:before {
         content: ' ';
-        // hexagon with default dirt background
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 292 334" version="1.1" xmlns="http://www.w3.org/2000/svg"><path id="border" d="M146.208,4.118l141.715,81.058l0,162.693l-141.715,81.347l-141.716,-81.347l0,-162.693l141.716,-81.058Z"/><path d="M146.208,4.118l141.715,81.058l0,162.693l-141.715,81.347l-141.716,-81.347l0,-162.693l141.716,-81.058Zm-0,24l120.882,69.142c-0,0 -0,138.546 -0,138.546c-0,0 -120.882,69.388 -120.882,69.388c-0,0 -120.883,-69.388 -120.883,-69.388c0,0 0,-138.546 0,-138.546l120.883,-69.142Z"/></svg>') no-repeat center;
-        background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 292 334" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path d="M145.833,0l145.834,83.112l-0,166.814l-145.834,83.407l-145.833,-83.407l-0,-166.814l145.833,-83.112Zm0,23.979l125,71.239c0,-0.001 0,142.623 0,142.623c0,0 -125,71.492 -125,71.492c0,0 -125,-71.492 -125,-71.492c0,0 0,-142.623 0,-142.623l125,-71.239Z" fill="black"/></svg>') no-repeat center, $dirt;
+
+        -webkit-mask: $hexagon-mask no-repeat center;
+        background: hexagon-shape("black") no-repeat center, $dirt;
 
         width: 40px;
         height: 40px;
@@ -235,8 +240,7 @@ h1 {
 
       @each $name, $color in $colors {
         &.#{$name}:before {
-          // hexagon with colored background
-          background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 292 334" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path d="M145.833,0l145.834,83.112l-0,166.814l-145.834,83.407l-145.833,-83.407l-0,-166.814l145.833,-83.112Zm0,23.979l125,71.239c0,-0.001 0,142.623 0,142.623c0,0 -125,71.492 -125,71.492c0,0 -125,-71.492 -125,-71.492c0,0 0,-142.623 0,-142.623l125,-71.239Z" fill="black"/></svg>') no-repeat center, $color;
+          background: hexagon-shape("black") no-repeat center, $color;
         }
       }
     }
@@ -301,8 +305,8 @@ h1 {
 
           &:before {
             content: ' ';
-            // hexagon
-            background: center no-repeat url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5 -5 80 90"><polygon fill="%232e2c2c" stroke="%23555" stroke-width="5" points="35 0, 70 20, 70 60, 35 80, 0 60, 0 20" /></svg>');
+
+            background: center no-repeat hexagon-shape("%23555");
 
             text-indent: 0;
             color: #2e2c2c;
