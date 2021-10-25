@@ -22,7 +22,7 @@ sbt application/fastOptJS::webpack
 python3 -m http.server
 ```
 
-Then access the app at [http://localhost:8000/application/src/main/resources/](http://localhost:8000/application/src/main/resources/).
+Then access the app at http://localhost:8000/application/src/main/resources/.
 
 
 ## Deployment
@@ -43,7 +43,6 @@ sbt application/fullOptJS::webpack
 Checkout the `gh-pages` branch.
 
 ```shell script
-rm -r images
 cp -r application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-opt-bundle.js \
   application/target/web/sass/main/{champions.png,favicon.png,styles.css,traits.svg} \
   webworker/target/scala-2.13/tft-comps-webworker-opt.js \
@@ -51,7 +50,9 @@ cp -r application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-o
 git add champions.png favicon.png styles.css traits.svg tft-comps-application-opt-bundle.js tft-comps-webworker-opt.js
 ```
 
-Then commit and push the changes and that's it.
+Check result at http://localhost:8000/.
+
+If it looks good commit and push the changes and that's it.
 
 
 ## Set Update
