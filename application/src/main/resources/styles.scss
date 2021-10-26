@@ -59,9 +59,11 @@ h1 {
   -webkit-text-stroke-width: 0.5px;
   -webkit-text-stroke-color: black;
   font-size: 64px;
-  background: left center / 128px 128px url("favicon.png") no-repeat;
+  background: top left / 128px url("favicon.png") no-repeat;
   padding-left: 128px;
-  line-height: 128px;
+  display: flex;
+  align-items: center;
+  min-height: 128px;
   margin-top: 0;
   margin-bottom: 0.25em;
 }
