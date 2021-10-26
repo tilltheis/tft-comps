@@ -76,13 +76,27 @@ h1 {
     position: relative;
 
     label {
-      background: left center / 2rem 2rem no-repeat;
       padding-left: 2.3rem;
+      position: relative;
+
+      &:after {
+        content: '';
+        -webkit-mask: left center / 2rem 2rem no-repeat;
+        background: $darkText;
+
+        width: 2rem;
+        height: 2rem;
+
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translate(0, -50%);
+      }
     }
 
     @each $role in $roles {
-      &.#{$role} label {
-        background-image: url("traits.svg#use-#{$role}");
+      &.#{$role} label:after {
+        -webkit-mask-image: url("traits.svg#use-#{$role}");
       }
     }
 
