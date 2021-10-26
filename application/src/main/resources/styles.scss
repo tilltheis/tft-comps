@@ -194,7 +194,7 @@ h1 {
 
       &:after {
         content: ' ';
-        background: center no-repeat;
+        background: $darkText;
 
         width: 40px;
         height: 40px;
@@ -207,7 +207,7 @@ h1 {
 
       @each $role in $roles {
         &.#{$role}:after {
-          background-image: url("traits.svg#use-#{$role}");
+          -webkit-mask-image: url("traits.svg#use-#{$role}");
         }
       }
 
@@ -300,7 +300,6 @@ h1 {
             background: center no-repeat hexagon-shape("%23555");
 
             text-indent: 0;
-            color: #2e2c2c;
             width: 40px;
             height: 40px;
 
