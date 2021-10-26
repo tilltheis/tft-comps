@@ -216,6 +216,11 @@ h1 {
           background: hexagon-shape("black") no-repeat center, $color;
         }
       }
+
+      &.is-required {
+        text-shadow: 0px 0px 5px #dcab06;
+        font-weight: bold;
+      }
     }
   }
 

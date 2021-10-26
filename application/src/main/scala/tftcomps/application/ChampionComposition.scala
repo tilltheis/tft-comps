@@ -75,6 +75,8 @@ object ChampionComposition {
                 ^.className := "role",
                 ^.className := role.name.toLowerCase.replaceAll("[^a-z]", ""),
                 ^.className := roleStackColor(role, count).map(_.value).getOrElse(""),
+                ^.classSet(
+                  "is-required" -> props.compositionConfig.requiredRoles.filter(_._2 > 0).keySet.contains(role)),
                 Attr[String]("data-name") := s"$count ${role.name}",
                 s"$count ${role.name}"
               )
