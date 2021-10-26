@@ -116,42 +116,25 @@ h1 {
 }
 
 .compositions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
   list-style: none;
   padding-left: 0;
-
-  .composition-entry {
-    margin-bottom: 1rem;
-    height: 20rem;
-  }
 }
 
 .composition {
   display: flex;
-  text-align: center;
-  position: relative;
+  align-items: stretch;
 
+  height: 100%;
+
+  position: relative;
   overflow: hidden;
 
-  &:hover {
-    position: absolute;
-
-    .synergy {
-      z-index: 2;
-    }
-
-    .composition-roles {
-      z-index: 1;
-
-      &:hover {
-        min-height: 18rem;
-        height: max-content;
-
-        .role &:nth-child(n+8) {
-          font-size: 16px;
-        }
-      }
-    }
-  }
+  border: 1px solid #000;
+  border-radius: 5px;
 
   .synergy {
     position: absolute;
@@ -173,41 +156,19 @@ h1 {
     padding: 1rem 2rem;
     list-style: none;
     width: 10rem;
-    height: 18rem;
 
     display: flex;
     flex-direction: column;
     align-content: flex-start;
+    gap: 2px;
 
-    border: 1px solid black;
-    border-radius: 0.5rem;
     background: scale-color($primaryBlue, $lightness: 70%);
     color: $darkText;
-
-    &:not(:hover) .role {
-
-      &:nth-child(n+8) {
-        font-size: 0;
-
-        &:after {
-          display: none;
-        }
-
-        &:nth-child(8) {
-          &:before {
-            content: "…";
-            font-size: 16px;
-            margin-top: -1rem;
-            background: none;
-            -webkit-mask: none;
-          }
-        }
-      }
-    }
 
     .role {
       position: relative;
 
+      font-family: Candara;
       font-size: 16px;
       text-indent: 45px;
       text-align: left;
@@ -258,59 +219,63 @@ h1 {
 
   .champions {
     display: flex;
+    flex-direction: column;
+    gap: 2px;
+
     list-style: none;
-    padding-left: 0;
+
+    padding: 1rem;
+    padding-right: 2rem;
+
+    background-color: #222;
 
     .champion {
-      width: 10.1rem;
-      height: 20rem;
-      overflow: hidden;
+      display: flex;
 
-      border: 1px solid black;
-      border-radius: 0.5rem;
-
-      background: top left / 10.1rem url("champions.png") no-repeat;
+      background: 0 / 40px url("champions.png") no-repeat;
 
       @for $i from 1 through length($champions) {
         $champion: nth($champions, $i);
 
         &.#{$champion} {
-          background-position: 0 (-10.1rem * ($i - 1));
+          background-position-y: (-40px * ($i - 1));
         }
       }
 
       .name, .champion-roles {
         color: $lightText;
-        background: #222;
         margin: 0;
         line-height: 40px;
         font-size: 20px;
       }
 
       .name {
-        margin-top: 10.1rem;
+        text-indent: calc(40px + 0.3rem);
+        width: 10rem;
+
+        font-size: 16px;
+        font-weight: normal;
+        font-family: Candara;
+        line-height: 40px;
       }
 
       &.is-required .name {
         text-shadow: 0px 0px 5px $primaryGold;
-        font-size: 24px;
+        font-weight: bold;
       }
 
       .champion-roles {
-        height: 100%;
-        flex-direction: column;
+        width: 8rem;
+        display: flex;
         padding-left: 0;
 
         .role {
           position: relative;
 
-          font-size: 16px;
-          color: white;
-          text-indent: 45px;
+          font-size: 0;
           text-align: left;
+          width: 40px;
           height: 40px;
-          line-height: 40px;
-          margin-left: 1rem;
           list-style: none;
 
           &.is-required {
@@ -340,8 +305,7 @@ h1 {
 
           &:after {
             content: ' ';
-            background: center no-repeat;
-            filter: invert(1);
+            background: $lightText;
 
             width: 40px;
             height: 40px;
@@ -354,7 +318,7 @@ h1 {
 
           @each $role in $roles {
             &.#{$role}:after {
-              background-image: url("traits.svg#use-#{$role}");
+              -webkit-mask-image: url("traits.svg#use-#{$role}");
             }
           }
         }
