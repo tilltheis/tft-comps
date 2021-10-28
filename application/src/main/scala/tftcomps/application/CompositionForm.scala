@@ -12,39 +12,31 @@ object CompositionForm {
                      possibleValues: Range,
                      selectedValue: Int,
                      maybeExplanation: Option[VdomNode] = None)(onChange: Int => Callback) = <.label(
-      ^.marginBottom := 0.5.rem,
-      ^.display := "flex",
-      ^.alignItems := "center",
-      <.div(^.width := 10.rem, s"$title:"),
+      ^.className := "number-slider",
+      <.div(^.className := "title", s"$title:"),
       <.input(
-        ^.width := 9.rem,
-        ^.marginRight := 1.rem,
+        ^.className := "input",
         ^.`type` := "range",
         ^.min := possibleValues.min,
         ^.max := possibleValues.max,
         ^.value := selectedValue,
         ^.onChange ==> ((e: ReactEventFromInput) => onChange(e.target.value.toInt))
       ),
-      <.div(^.width := 10.rem, s" $selectedValue"),
+      <.div(^.className := "value", s" $selectedValue"),
       maybeExplanation
     )
 
     def requiredChampionsField(title: String, possibleValues: Set[Champion], selectedValues: Set[Champion])(
         onChange: Set[Champion] => Callback) = <.div(
       ^.className := "champion-filter",
-      ^.marginBottom := 0.5.rem,
-      ^.display := "flex",
-      <.div(^.width := 10.rem, s"$title:"),
+      <.div(^.className := "title", s"$title:"),
       <.div(
-        ^.columnWidth := 10.rem,
-        ^.columnCount := "9",
-        ^.columnGap := 0.rem,
+        ^.className := "options",
         possibleValues.toSeq
           .sortBy(_.name)
           .toTagMod { champion =>
             val isSelected = selectedValues.contains(champion)
             <.label(
-              ^.display := "block",
               ^.className := "champion",
               ^.className := champion.name.toLowerCase.replaceAll("[^a-z]", ""),
               ^.classSet("is-selected" -> isSelected),
@@ -56,7 +48,7 @@ object CompositionForm {
                   onChange(if (e.target.checked) selectedValues + champion else selectedValues - champion)
                 }
               ),
-              <.span(^.fontWeight := (if (isSelected) "bold" else "normal"), champion.name)
+              champion.name
             )
           }
       )
@@ -64,13 +56,9 @@ object CompositionForm {
 
     def requiredRolesField(title: String, values: Map[Role, Int])(onChange: Map[Role, Int] => Callback) = <.div(
       ^.className := "role-filter",
-      ^.marginBottom := 0.5.rem,
-      ^.display := "flex",
-      <.div(^.width := 10.rem, s"$title:"),
+      <.div(^.className := "title", s"$title:"),
       <.div(
-        ^.columnWidth := 9.rem,
-        ^.columnCount := "9",
-        ^.columnGap := 1.rem,
+        ^.className := "options",
         values.toSeq
           .sortBy(_._1.name)
           .toTagMod {
@@ -80,16 +68,9 @@ object CompositionForm {
                 ^.className := "role",
                 ^.className := role.name.toLowerCase.replaceAll("[^a-z]", ""),
                 ^.className := (if (isChanged) "is-changed" else ""),
-                ^.pageBreakInside := "avoid",
-                ^.marginBottom := 0.5.rem,
                 <.label(
-                  ^.display := "block",
-                  <.div(^.fontWeight := (if (isChanged) "bold" else "normal"),
-                        s"$count/${role.stackingBonusThresholds.max} ${role.name}"),
+                  <.div(s"$count/${role.stackingBonusThresholds.max} ${role.name}"),
                   <.input(
-                    ^.margin := 0.rem,
-                    ^.width := "100%",
-                    ^.display := "block",
                     ^.`type` := "range",
                     ^.min := 0,
                     ^.max := role.stackingBonusThresholds.size, // +1 because 0 is not included in thresholds
@@ -124,7 +105,7 @@ object CompositionForm {
         Some(
           <.i(
             "Increasing this ",
-            <.i(^.fontStyle := "normal", "might"),
+            <.i("might"),
             " result in finding results where none could be found before. ",
             "Usually, it just leads to slower searches with even fewer (but good) results."
           ))

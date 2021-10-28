@@ -9,23 +9,24 @@ object CompositionResults {
   final case class Props(compositions: Seq[Composition], searchResultCount: Int, compositionConfig: CompositionConfig)
 
   val Component = ScalaFnComponent[Props] { props =>
-    if (props.compositions.isEmpty) <.p(s"No results from ${props.searchResultCount}/500 searches.")
+    if (props.compositions.isEmpty)
+      <.div(^.className := "results",
+            <.p(^.className := "description", s"No results from ${props.searchResultCount}/500 searches."))
     else {
       val synergyPercentages = props.compositions.map(_.synergyPercentage.*(100).toInt)
       <.div(
+        ^.className := "results",
         <.p(
-          s"Showing top ${props.compositions.size} compositions between ${synergyPercentages.min}% and ${synergyPercentages.max}% synergy from ${props.searchResultCount}/500 searches."),
+          ^.className := "description",
+          s"Showing top ${props.compositions.size} compositions between ${synergyPercentages.min}% and ${synergyPercentages.max}% synergy from ${props.searchResultCount}/500 searches."
+        ),
         <.dl(
-          ^.display := "flex",
-          ^.flexDirection := "column",
-          ^.flexWrap := "wrap",
-          ^.alignContent := "flex-start",
-          ^.height := 2.rem,
+          ^.className := "distribution",
           props.compositions.groupBy(_.synergyPercentage.*(100).toInt).toSeq.sortBy(-_._1).toTagMod {
             case (synergyPercentage, comps) =>
               React.Fragment(
-                <.dt(^.width := 10.rem, ^.height := 1.rem, ^.fontWeight := "bold", s"$synergyPercentage%"),
-                <.dd(^.width := 10.rem, ^.height := 1.rem, ^.margin := 0.rem, comps.size)
+                <.dt(s"$synergyPercentage%"),
+                <.dd(comps.size)
               )
           }
         ),

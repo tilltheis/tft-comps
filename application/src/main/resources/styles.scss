@@ -69,16 +69,61 @@ h1 {
   margin-bottom: 0.25em;
 }
 
+i > i {
+  font-style: normal;
+}
+
+.number-slider {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+
+  .title {
+    width: 10rem;
+  }
+
+  .input {
+    width: 9rem;
+    margin-right: 1rem;
+  }
+
+  .value {
+    width: 10rem;
+  }
+}
+
 .role-filter {
+  margin-bottom: 0.5rem;
+  display: flex;
+
+  .title {
+    width: 10rem;
+  }
+
+  .options {
+    column-width: 9rem;
+    column-count: 9;
+    column-gap: 1rem;
+  }
+
   .role {
     width: 9rem;
     white-space: nowrap;
+    page-break-inside: avoid;
+    margin-bottom: 0.5rem;
 
     position: relative;
 
     label {
+      display: block;
       padding-left: 2.3rem;
       position: relative;
+
+      input {
+        margin: 0;
+        width: 100%;
+        display: block;
+      }
 
       &:after {
         content: '';
@@ -104,14 +149,29 @@ h1 {
     &.is-changed, &:hover {
       text-shadow: 0px 0px 5px $primaryGold;
     }
+
+    &.is-changed {
+      font-weight: bold;
+    }
   }
 }
 
 .champion-filter {
+  margin-bottom: 0.5rem;
+  display: flex;
+
+  .title {
+    width: 10rem;
+  }
+
+  .options {
+    column-width: 10rem;
+    column-count: 9;
+    column-gap: 0;
+  }
+
   .champion {
-    input {
-      display: none;
-    }
+    display: block;
 
     background: left center / 2rem auto url("champions.png") no-repeat;
     padding-left: 2.3rem;
@@ -128,6 +188,36 @@ h1 {
 
     &.is-selected, &:hover {
       text-shadow: 0px 0px 5px $primaryGold;
+    }
+
+    &.is-selected {
+      font-weight: bold;
+    }
+
+    input {
+      display: none;
+    }
+  }
+}
+
+.results {
+  .distribution {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: 2rem;
+
+    dt {
+      width: 10rem;
+      height: 1rem;
+      font-weight: bold;
+    }
+
+    dd {
+      width: 10rem;
+      height: 1rem;
+      margin: 0;
     }
   }
 }
