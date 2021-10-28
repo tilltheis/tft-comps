@@ -91,15 +91,15 @@ object CompositionForm {
                     ^.width := "100%",
                     ^.display := "block",
                     ^.`type` := "range",
-                    ^.list := s"${role.name}-thresholds",
                     ^.min := 0,
-                    ^.max := role.stackingBonusThresholds.max,
-                    ^.value := count,
-                    ^.onChange ==> ((e: ReactEventFromInput) => onChange(values.updated(role, e.target.value.toInt)))
-                  ),
-                  <.datalist(
-                    ^.id := s"${role.name}-thresholds",
-                    (0 +: role.stackingBonusThresholds.toSeq.sorted).toTagMod(i => <.option(^.value := i.toString)))
+                    ^.max := role.stackingBonusThresholds.size, // +1 because 0 is not included in thresholds
+                    ^.value := role.stackingBonusThresholds.toSeq.sorted.indexOf(count) + 1,
+                    ^.onChange ==> { (e: ReactEventFromInput) =>
+                      val newCount =
+                        role.stackingBonusThresholds.toSeq.sorted.lift(e.target.value.toInt - 1).getOrElse(0)
+                      onChange(values.updated(role, newCount))
+                    }
+                  )
                 )
               )
           }
