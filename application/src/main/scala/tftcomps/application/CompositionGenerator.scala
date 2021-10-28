@@ -38,7 +38,8 @@ object CompositionGenerator {
           $.modState { state =>
             val newCompositions = maybeComposition.fold(state.compositions)(state.compositions :+ _)
             state.copy(
-              compositions = newCompositions.distinct.sortBy(-_.synergyPercentage).take(50),
+              compositions =
+                newCompositions.distinct.sortBy(c => (-c.synergyPercentage, -c.champions.map(_.cost).sum)).take(50),
               searchResultCount = state.searchResultCount + 1
             )
           }.runNow()
