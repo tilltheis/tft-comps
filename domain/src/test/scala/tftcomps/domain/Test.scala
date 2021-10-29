@@ -142,6 +142,15 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals with S
       searchWithMinRoleThresholds(allChampions, 2, requiredRoles = Set(role1)) should ===(None)
     }
 
+    "find nothing when the number of required roles cannot be satisfied because the count threshold cannot be reached when thoroughness < max team size" in {
+      val role1 = Role("role1", Set(2))
+      val champ1 = Champion("champ1", Set(role1), 1)
+      val champ2 = Champion("champ2", Set(role1), 1)
+      val allChampions = Seq(champ1, champ2)
+
+      search(allChampions, 1, 0, Map(role1 -> 2)) shouldBe empty
+    }
+
     "find something when role and champion requirements don't overlap but can be fulifilled" in {
       val role1 = Role("role1", Set(3))
       val role2 = Role("role2", Set(4))

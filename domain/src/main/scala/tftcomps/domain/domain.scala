@@ -151,7 +151,7 @@ package object domain {
       val firstResult = genericIdaStar(
         initialComposition,
         firstTeamSize,
-        allowIncomplete = true
+        allowIncomplete = firstTeamSize < maxTeamSize
       )(greedyF)
 
       val secondResult = firstResult.flatMap {
