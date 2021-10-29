@@ -10,16 +10,20 @@ object CompositionResults {
 
   val Component = ScalaFnComponent[Props] { props =>
     if (props.compositions.isEmpty)
-      <.div(^.className := "results",
-            <.p(^.className := "description", s"No results from ${props.searchResultCount}/500 searches."))
+      <.div(
+        ^.className := "results",
+        <.p(^.className := "description", s"No results from ${props.searchResultCount}/500 searches, yet."),
+        <.progress(^.max := 150, ^.value := props.searchResultCount)
+      )
     else {
       val synergyPercentages = props.compositions.map(_.synergyPercentage.*(100).toInt)
       <.div(
         ^.className := "results",
         <.p(
           ^.className := "description",
-          s"Showing top ${props.compositions.size} compositions between ${synergyPercentages.min}% and ${synergyPercentages.max}% synergy from ${props.searchResultCount}/500 searches."
+          s"Showing top ${props.compositions.size} compositions between ${synergyPercentages.min}% and ${synergyPercentages.max}% synergy from ${props.searchResultCount}/150 searches."
         ),
+        <.progress(^.max := 150, ^.value := props.searchResultCount),
         <.dl(
           ^.className := "distribution",
           props.compositions.groupBy(_.synergyPercentage.*(100).toInt).toSeq.sortBy(-_._1).toTagMod {

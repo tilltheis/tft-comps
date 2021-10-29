@@ -19,6 +19,8 @@ object CompositionForm {
         ^.`type` := "range",
         ^.min := possibleValues.min,
         ^.max := possibleValues.max,
+        ^.style := scalajs.js.Dynamic.literal(
+          "--percentage" -> s"${(selectedValue - possibleValues.min).toDouble / (possibleValues.max - possibleValues.min) * 100}%"),
         ^.value := selectedValue,
         ^.onChange ==> ((e: ReactEventFromInput) => onChange(e.target.value.toInt))
       ),
@@ -64,6 +66,8 @@ object CompositionForm {
           .toTagMod {
             case (role, count) =>
               val isChanged = count > 0
+              val percentage = (role.stackingBonusThresholds.toSeq.sorted.indexOf(count) + 1).toDouble /
+                role.stackingBonusThresholds.size * 100
               <.div(
                 ^.className := "role",
                 ^.className := role.name.toLowerCase.replaceAll("[^a-z]", ""),
@@ -74,6 +78,7 @@ object CompositionForm {
                     ^.`type` := "range",
                     ^.min := 0,
                     ^.max := role.stackingBonusThresholds.size, // +1 because 0 is not included in thresholds
+                    ^.style := scalajs.js.Dynamic.literal("--percentage" -> s"$percentage%"),
                     ^.value := role.stackingBonusThresholds.toSeq.sorted.indexOf(count) + 1,
                     ^.onChange ==> { (e: ReactEventFromInput) =>
                       val newCount =

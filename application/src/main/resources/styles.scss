@@ -9,6 +9,10 @@ $silver: #BDDBDE;
 $gold: #EFD377;
 $dirt: #918888;
 
+$sliderColor: $primaryGold;
+$sliderBackgroundColor: #efefef;
+$sliderBorderColor: #b2b2b2;
+
 $chromatic-desaturation-amount: 50%;
 $chromatic: conic-gradient(
   desaturate(#B5FFB5, $chromatic-desaturation-amount),
@@ -86,6 +90,124 @@ i > i {
   font-style: normal;
 }
 
+progress {
+  -webkit-appearance: none;
+  height: 1.6rem;
+
+  position: relative;
+
+  &::-webkit-progress-bar {
+    height: 0.8rem;
+    border: 0.001rem solid $sliderBorderColor;
+    border-radius: 0.8rem;
+    background: $sliderBackgroundColor;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(0, -50%);
+  }
+
+  &::-webkit-progress-value {
+    background: $sliderColor;
+    border-radius: 0.8rem;
+  }
+
+  @supports (-moz-appearance:none) {
+    height: 0.8rem;
+    border-radius: 0.8rem;
+    background: $sliderBackgroundColor;
+    border: 0.1rem solid $sliderBorderColor;
+    margin: 0.4rem 0;
+  }
+
+  &::-moz-progress-bar {
+    background: $sliderColor;
+    border-radius: 0.8rem;
+  }
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  height: 1.6rem;
+  background: transparent;
+
+  position: relative;
+
+  // Chrome doesn't properly render slider track borders in combination w/ the thumb, therefore I have to improvise.
+  &:after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 0.8rem;
+
+    border: 0.001rem solid $sliderBorderColor;
+    border-radius: 1.6rem;
+    background: linear-gradient(to left, $sliderBackgroundColor calc(100% - var(--percentage)), $sliderColor calc(100% - var(--percentage)));
+
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(0, -50%);
+    z-index: -1;
+  }
+
+  &::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    height: 0.8rem;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: $sliderColor;
+    margin-top: -1.6rem/2 + 0.8rem/2;
+
+    border: 0.001rem solid $sliderBorderColor;
+    background: $sliderBackgroundColor;
+ }
+
+ &::-moz-range-track {
+    height: 0.6rem;
+    border: 0.001rem solid $sliderBorderColor;
+    border-radius: 1.6rem;
+    background: linear-gradient(to left, $sliderBackgroundColor calc(100% - var(--percentage)), $sliderColor calc(100% - var(--percentage)));
+ }
+
+ &::-moz-range-thumb {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: $sliderColor;
+    margin-top: -0.45rem;
+
+    border: 0.001rem solid $sliderBorderColor;
+    background: $sliderBackgroundColor;
+ }
+
+  &:hover {
+    &:after {
+      background: linear-gradient(to left, scale-color($sliderBackgroundColor, $lightness: -5%) calc(100% - var(--percentage)), scale-color($sliderColor, $lightness: -5%) calc(100% - var(--percentage)));
+    }
+
+    &::-moz-range-track {
+      background: linear-gradient(to left, scale-color($sliderBackgroundColor, $lightness: -5%) calc(100% - var(--percentage)), scale-color($sliderColor, $lightness: -5%) calc(100% - var(--percentage)));
+    }
+  }
+
+  &:active {
+    &::-webkit-slider-thumb {
+      background: scale-color($sliderBackgroundColor, $lightness: 75%);
+    }
+
+    &::-moz-range-thumb {
+      background: scale-color($sliderBackgroundColor, $lightness: 75%);
+    }
+  }
+}
+
+
 #app {
   // page width = 1rem body padding, 1rem result card gap, 50rem result card width, 2rem scroll bar width
   // app width = page width - body margin - scroll bar width
@@ -111,7 +233,7 @@ i > i {
   align-items: center;
 
   .title {
-    width: 16rem;
+    min-width: 16rem;
   }
 
   .input {
@@ -229,22 +351,35 @@ i > i {
 }
 
 .results {
+  margin-bottom: 2rem;
+
+  progress {
+    display: block;
+    width: 100%;
+  }
+
+  .description {
+    margin: 3rem 0 0;
+  }
+
   .distribution {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
     align-content: flex-start;
-    height: 2rem;
+    height: 3.2rem;
+    margin: 0 0 2rem;
+    overflow: hidden;
 
     dt {
       width: 10rem;
-      height: 1rem;
+      height: 1.6rem;
       font-weight: bold;
     }
 
     dd {
       width: 10rem;
-      height: 1rem;
+      height: 1.6rem;
       margin: 0;
     }
   }
@@ -257,6 +392,7 @@ i > i {
 
   list-style: none;
   padding-left: 0;
+  margin: 0;
 }
 
 .composition {
@@ -468,4 +604,8 @@ i > i {
       }
     }
   }
+}
+
+footer {
+  margin-bottom: 1rem;
 }

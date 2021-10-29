@@ -3,6 +3,7 @@ package tftcomps.application
 import japgolly.scalajs.react.component.Scala.{BackendScope, Unmounted}
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, CallbackTo, ScalaComponent}
+import java.util.concurrent.atomic.AtomicInteger
 import org.scalajs.dom.raw.{MessageEvent, Worker}
 import tftcomps.domain.{Composition, CompositionConfig, data}
 
@@ -10,7 +11,7 @@ object CompositionGenerator {
   final case class State(compositionConfig: CompositionConfig,
                          compositions: Seq[Composition],
                          searchResultCount: Int,
-                         worker: Option[Worker])
+                         workers: Seq[Worker])
   object State {
     val empty: State = State(
       CompositionConfig(maxTeamSize = 8,
@@ -20,7 +21,7 @@ object CompositionGenerator {
                         searchThoroughness = 2),
       Seq.empty,
       0,
-      None
+      Seq.empty
     )
   }
 
@@ -30,26 +31,40 @@ object CompositionGenerator {
       import io.circe.syntax._
       import tftcomps.domain.codec._
 
-      val terminateWorker = $.state.map(_.worker.foreach(_.terminate()))
-      val spawnWorker = CallbackTo {
-        val worker = new Worker("../../../../webworker/target/scala-2.13/tft-comps-webworker-fastopt.js")
-        worker.onmessage = { (event: MessageEvent) =>
-          val maybeComposition = decode[Option[Composition]](event.data.asInstanceOf[String]).toTry.get
-          $.modState { state =>
-            val newCompositions = maybeComposition.fold(state.compositions)(state.compositions :+ _)
-            state.copy(
-              compositions =
-                newCompositions.distinct.sortBy(c => (-c.synergyPercentage, -c.champions.map(_.cost).sum)).take(50),
-              searchResultCount = state.searchResultCount + 1
-            )
-          }.runNow()
+      val batchSize = 10
+      val remainingTaskCount = new AtomicInteger(150 - batchSize)
+
+      val terminateWorkers = $.state.map(_.workers.foreach(_.terminate()))
+      val spawnWorkers = CallbackTo {
+        (0 until batchSize).map { i =>
+          // fastest worker will produce most results but that's ok
+          val thoroughnessOverride = Seq(0, 1, 2, 3, 4)(i % 5)
+          val worker = new Worker("../../../../webworker/target/scala-2.13/tft-comps-webworker-fastopt.js")
+          worker.onmessage = { (event: MessageEvent) =>
+            if (remainingTaskCount.decrementAndGet() >= 0) {
+              // give the computer time to breath
+              scalajs.js.timers.setTimeout(0) {
+                worker.postMessage(newCompositionConfig.copy(searchThoroughness = thoroughnessOverride).asJson.noSpaces)
+              }
+            }
+            val maybeComposition = decode[Option[Composition]](event.data.asInstanceOf[String]).toTry.get
+            $.modState { state =>
+              val newCompositions = maybeComposition.fold(state.compositions)(state.compositions :+ _)
+              state.copy(
+                compositions =
+                  newCompositions.distinct.sortBy(c => (-c.synergyPercentage, -c.champions.map(_.cost).sum)).take(50),
+                searchResultCount = state.searchResultCount + 1
+              )
+            }.runNow()
+          }
+          worker
         }
-        worker
       }
-      def setNewState(worker: Worker) =
-        $.setState(State.empty.copy(compositionConfig = newCompositionConfig, worker = Some(worker)))
-      def startWorker(worker: Worker) = Callback(worker.postMessage(newCompositionConfig.asJson.noSpaces))
-      terminateWorker >> (spawnWorker >>= (w => setNewState(w) >> startWorker(w)))
+      def setNewState(workers: Seq[Worker]) =
+        $.setState(State.empty.copy(compositionConfig = newCompositionConfig, workers = workers))
+      def startWorkers(workers: Seq[Worker]) =
+        Callback(workers.foreach(_.postMessage(newCompositionConfig.asJson.noSpaces)))
+      terminateWorkers >> (spawnWorkers >>= (w => setNewState(w) >> startWorkers(w)))
     }
 
     def render(state: State): VdomNode = {
