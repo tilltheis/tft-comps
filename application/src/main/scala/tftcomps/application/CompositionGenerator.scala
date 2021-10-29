@@ -56,7 +56,9 @@ object CompositionGenerator {
       <.div(
         <.h1("TFT Team Composition Generator for Set 5.5"),
         CompositionForm(state.compositionConfig, handleCompositionConfigChange),
-        CompositionResults(state.compositions, state.searchResultCount, state.compositionConfig)
+        CompositionResults(state.compositions, state.searchResultCount, state.compositionConfig),
+        <.footer(
+          "The TFT Team Composition Generator isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.")
       )
     }
   }

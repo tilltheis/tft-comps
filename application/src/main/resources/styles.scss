@@ -45,10 +45,21 @@ $bodyFont: Calibri, Helvetica, Sans-Serif;
 
 
 html {
+  font-size: 62.5%; // 1rem = 10px
   background: linear-gradient(to bottom right, rgba($primaryBlue, 0.05) 0%, rgba($primaryBlue, 0.1) 100%);
   min-height: 100%;
   color: $darkText;
   font-family: $bodyFont;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 1rem;
+  font-size: 1.6rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -57,20 +68,43 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
   color: $primaryGold;
-  -webkit-text-stroke-width: 0.5px;
+  -webkit-text-stroke-width: 0.05rem;
   -webkit-text-stroke-color: black;
-  font-size: 64px;
+  font-size: 6.4rem;
   background: top left / 128px url("favicon.png") no-repeat;
-  padding-left: 128px;
+  padding-left: 12.8rem;
   display: flex;
   align-items: center;
-  min-height: 128px;
+  min-height: 12.8rem;
   margin-top: 0;
-  margin-bottom: 0.25em;
+  margin-bottom: 1.5rem;
 }
 
 i > i {
   font-style: normal;
+}
+
+#app {
+  // page width = 1rem body margin, 1rem result card gap, 50rem result card width, 2rem scroll bar width
+  // app width = page width - body margin - scroll bar width
+
+  // build grid around result card size, ie 1, 2, 3, 4 result cards in a row
+
+  width: 50rem;
+
+  @media (min-width: (105em * 0.625)) {
+    width: 101rem;
+  }
+
+  @media (min-width: (156em * 0.625)) {
+    width: 152rem;
+  }
+
+  @media (min-width: (207em * 0.625)) {
+    width: 203rem;
+  }
+
+  margin: auto;
 }
 
 .number-slider {
@@ -79,16 +113,16 @@ i > i {
   align-items: center;
 
   .title {
-    width: 10rem;
+    width: 16rem;
   }
 
   .input {
-    width: 9rem;
-    margin-right: 1rem;
+    width: 14.4rem;
+    margin-right: 1.6rem;
   }
 
   .value {
-    width: 10rem;
+    width: 16rem;
   }
 }
 
@@ -97,17 +131,17 @@ i > i {
   display: flex;
 
   .title {
-    width: 10rem;
+    width: 16rem;
   }
 
   .options {
-    column-width: 9rem;
+    column-width: 14.4rem;
     column-count: 9;
-    column-gap: 1rem;
+    column-gap: 1.6rem;
   }
 
   .role {
-    width: 9rem;
+    width: 14.4rem;
     white-space: nowrap;
     page-break-inside: avoid;
     margin-bottom: 0.5rem;
@@ -116,7 +150,7 @@ i > i {
 
     label {
       display: block;
-      padding-left: 2.3rem;
+      padding-left: 3.5rem;
       position: relative;
 
       input {
@@ -127,11 +161,11 @@ i > i {
 
       &:after {
         content: '';
-        -webkit-mask: left center / 2rem 2rem no-repeat;
+        -webkit-mask: left center / 3rem 3rem no-repeat;
         background: $darkText;
 
-        width: 2rem;
-        height: 2rem;
+        width: 3rem;
+        height: 3rem;
 
         position: absolute;
         left: 0;
@@ -147,7 +181,7 @@ i > i {
     }
 
     &.is-changed, &:hover {
-      text-shadow: 0px 0px 5px $primaryGold;
+      text-shadow: 0 0 0.5rem $primaryGold;
     }
 
     &.is-changed {
@@ -161,11 +195,11 @@ i > i {
   display: flex;
 
   .title {
-    width: 10rem;
+    width: 16rem;
   }
 
   .options {
-    column-width: 10rem;
+    column-width: 16rem;
     column-count: 9;
     column-gap: 0;
   }
@@ -173,21 +207,21 @@ i > i {
   .champion {
     display: block;
 
-    background: left center / 2rem auto url("champions.png") no-repeat;
-    padding-left: 2.3rem;
-    line-height: 2rem;
-    margin-bottom: 2px;
+    background: left center / 3rem auto url("champions.png") no-repeat;
+    padding-left: 3.5rem;
+    line-height: 3rem;
+    margin-bottom: 0.2rem;
 
     @for $i from 1 through length($champions) {
       $champion: nth($champions, $i);
 
       &.#{$champion} {
-        background-position: 0 (-2rem * ($i - 1));
+        background-position: 0 (-3rem * ($i - 1));
       }
     }
 
     &.is-selected, &:hover {
-      text-shadow: 0px 0px 5px $primaryGold;
+      text-shadow: 0 0 0.5rem $primaryGold;
     }
 
     &.is-selected {
@@ -240,21 +274,23 @@ i > i {
   position: relative;
   overflow: hidden;
 
-  border: 1px solid #000;
-  border-radius: 5px;
+  border: 0.1rem solid #000;
+  border-radius: 0.5rem;
 
   font-family: $titleFont;
 
   .synergy {
     position: absolute;
-    transform: rotate(-45deg);
+    transform: rotate(45deg);
     width: 10rem;
     text-align: center;
-    top: -0.5rem;
-    left: -3.75rem;
-    background: $primaryBlue;
-    text-shadow: 1px 1px black;
+    top: -1.3rem;
+    left: 43rem;
+    background: scale-color($primaryBlue, $lightness: -5%);
+    text-shadow: 0.1rem 0.1rem black;
     color: $lightText;
+    z-index: 1;
+    outline: 0.1rem solid #000;
 
     small {
       display: none;
@@ -264,12 +300,12 @@ i > i {
   .composition-roles {
     padding: 1rem 2rem;
     list-style: none;
-    width: 10rem;
+    width: 19rem - 0.1rem;
 
     display: flex;
     flex-direction: column;
     align-content: flex-start;
-    gap: 2px;
+    gap: 0.2rem;
 
     background: scale-color($primaryBlue, $lightness: 70%);
     color: $darkText;
@@ -277,13 +313,13 @@ i > i {
     .role {
       position: relative;
 
-      font-size: 16px;
-      text-indent: 45px;
+      font-size: 1.6rem;
+      text-indent: 4.5rem;
       text-align: left;
       white-space: nowrap;
 
-      height: 40px;
-      line-height: 40px;
+      height: 4rem;
+      line-height: 4rem;
 
       &:before {
         content: ' ';
@@ -291,12 +327,12 @@ i > i {
         -webkit-mask: $hexagon-mask no-repeat center;
         background: hexagon-shape("black") no-repeat center, $dirt;
 
-        width: 40px;
-        height: 40px;
+        width: 4rem;
+        height: 4rem;
 
         position: absolute;
         top: 50%;
-        left: 0px;
+        left: 0;
         transform: translate(0, -50%) scale(0.95);
       }
 
@@ -304,11 +340,11 @@ i > i {
         content: ' ';
         background: $darkText;
 
-        width: 40px;
-        height: 40px;
+        width: 4rem;
+        height: 4rem;
 
         position: absolute;
-        left: 0px;
+        left: 0;
         top: 50%;
         transform: translate(0, -50%) scale(0.5);
       }
@@ -326,7 +362,7 @@ i > i {
       }
 
       &.is-required {
-        text-shadow: 0px 0px 5px #dcab06;
+        text-shadow: 0 0 0.5rem #dcab06;
         font-weight: bold;
       }
     }
@@ -335,52 +371,51 @@ i > i {
   .champions {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0.2rem;
 
     list-style: none;
 
-    padding: 1rem;
-    padding-right: 2rem;
+    padding: 1rem 2rem;
 
     background-color: #222;
 
     .champion {
       display: flex;
 
-      background: 0 / 40px url("champions.png") no-repeat;
+      background: 0 / 4rem url("champions.png") no-repeat;
 
       @for $i from 1 through length($champions) {
         $champion: nth($champions, $i);
 
         &.#{$champion} {
-          background-position-y: (-40px * ($i - 1));
+          background-position-y: (-4rem * ($i - 1));
         }
       }
 
       .name, .champion-roles {
         color: $lightText;
         margin: 0;
-        line-height: 40px;
-        font-size: 20px;
+        line-height: 4rem;
+        font-size: 2rem;
       }
 
       .name {
-        text-indent: calc(40px + 0.3rem);
-        width: 10rem;
+        text-indent: calc(4rem + 0.3rem);
+        width: 15rem - 0.1rem;
 
-        font-size: 16px;
+        font-size: 1.6rem;
         font-weight: normal;
         white-space: nowrap;
-        line-height: 40px;
+        line-height: 4rem;
       }
 
       &.is-required .name {
-        text-shadow: 0px 0px 5px $primaryGold;
+        text-shadow: 0 0 0.5rem $primaryGold;
         font-weight: bold;
       }
 
       .champion-roles {
-        width: 8rem;
+        width: 12rem;
         display: flex;
         padding-left: 0;
 
@@ -389,16 +424,16 @@ i > i {
 
           font-size: 0;
           text-align: left;
-          width: 40px;
-          height: 40px;
+          width: 4rem;
+          height: 4rem;
           list-style: none;
 
           &.is-required {
-            text-shadow: 0px 0px 5px #dcab06;
+            text-shadow: 0 0 0.5rem #dcab06;
             font-weight: bold;
 
             &:before {
-              filter: drop-shadow(0px 0px 5px scale-color($primaryGold, $alpha: -30%));
+              filter: drop-shadow(0 0 0.5rem scale-color($primaryGold, $alpha: -30%));
             }
           }
 
@@ -408,12 +443,12 @@ i > i {
             background: center no-repeat hexagon-shape("%23555");
 
             text-indent: 0;
-            width: 40px;
-            height: 40px;
+            width: 4rem;
+            height: 4rem;
 
             position: absolute;
             top: 50%;
-            left: 0px;
+            left: 0;
             transform: translate(0, -50%) scale(0.95);
           }
 
@@ -421,11 +456,11 @@ i > i {
             content: ' ';
             background: $lightText;
 
-            width: 40px;
-            height: 40px;
+            width: 4rem;
+            height: 4rem;
 
             position: absolute;
-            left: 0px;
+            left: 0;
             top: 50%;
             transform: translate(0, -50%) scale(0.5);
           }
