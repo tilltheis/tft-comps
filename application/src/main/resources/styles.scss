@@ -58,8 +58,10 @@ html {
 }
 
 body {
-  margin: 1rem;
+  margin: 0;
+  padding: 1rem;
   font-size: 1.6rem;
+  min-width: 52rem; // 1 * 500rem card width + 2 * 1rem padding
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -71,8 +73,8 @@ h1 {
   -webkit-text-stroke-width: 0.05rem;
   -webkit-text-stroke-color: black;
   font-size: 6.4rem;
-  background: top left / 128px url("favicon.png") no-repeat;
-  padding-left: 12.8rem;
+  background: center left / 128px url("favicon.png") no-repeat;
+  padding-left: 13.8rem;
   display: flex;
   align-items: center;
   min-height: 12.8rem;
@@ -85,10 +87,10 @@ i > i {
 }
 
 #app {
-  // page width = 1rem body margin, 1rem result card gap, 50rem result card width, 2rem scroll bar width
+  // page width = 1rem body padding, 1rem result card gap, 50rem result card width, 2rem scroll bar width
   // app width = page width - body margin - scroll bar width
 
-  // build grid around result card size, ie 1, 2, 3, 4 result cards in a row
+  // build grid around result card size, ie 1, 2, 3 result cards in a row
 
   width: 50rem;
 
@@ -98,10 +100,6 @@ i > i {
 
   @media (min-width: (156em * 0.625)) {
     width: 152rem;
-  }
-
-  @media (min-width: (207em * 0.625)) {
-    width: 203rem;
   }
 
   margin: auto;
@@ -128,10 +126,10 @@ i > i {
 
 .role-filter {
   margin-bottom: 0.5rem;
-  display: flex;
 
   .title {
     min-width: 16rem;
+    margin-bottom: 0.5rem;
   }
 
   .options {
@@ -188,10 +186,10 @@ i > i {
 
 .champion-filter {
   margin-bottom: 0.5rem;
-  display: flex;
 
   .title {
     min-width: 16rem;
+    margin-bottom: 0.5rem;
   }
 
   .options {
