@@ -131,22 +131,18 @@ i > i {
   display: flex;
 
   .title {
-    width: 16rem;
+    min-width: 16rem;
   }
 
   .options {
-    column-width: 14.4rem;
-    column-count: 9;
-    column-gap: 1.6rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.5rem 1rem;
+    width: 100%;
   }
 
   .role {
-    width: 14.4rem;
     white-space: nowrap;
-    page-break-inside: avoid;
-    margin-bottom: 0.5rem;
-
-    position: relative;
 
     label {
       display: block;
@@ -195,13 +191,14 @@ i > i {
   display: flex;
 
   .title {
-    width: 16rem;
+    min-width: 16rem;
   }
 
   .options {
-    column-width: 16rem;
-    column-count: 9;
-    column-gap: 0;
+    display: grid;
+    grid-template-columns: repeat( auto-fit, minmax(15rem, 1fr) );
+    gap: 0.5rem 1rem;
+    width: 100%;
   }
 
   .champion {
@@ -210,7 +207,6 @@ i > i {
     background: left center / 3rem auto url("champions.png") no-repeat;
     padding-left: 3.5rem;
     line-height: 3rem;
-    margin-bottom: 0.2rem;
 
     @for $i from 1 through length($champions) {
       $champion: nth($champions, $i);
