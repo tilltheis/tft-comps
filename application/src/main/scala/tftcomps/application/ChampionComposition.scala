@@ -3,11 +3,11 @@ package tftcomps.application
 import japgolly.scalajs.react.ScalaFnComponent
 import japgolly.scalajs.react.vdom.Attr
 import japgolly.scalajs.react.vdom.html_<^._
-import tftcomps.domain.{Composition, CompositionConfig, Role}
+import tftcomps.domain.{Composition, Role}
 
 object ChampionComposition {
 
-  final case class Props(composition: Composition, quality: Double, compositionConfig: CompositionConfig)
+  final case class Props(composition: Composition, quality: Double, compositionConfig: UiCompositionConfig)
 
   sealed abstract class Color(val value: String)
   object Color {
@@ -109,6 +109,6 @@ object ChampionComposition {
     )
   }
 
-  def apply(composition: Composition, quality: Double, compositionConfig: CompositionConfig) =
+  def apply(composition: Composition, quality: Double, compositionConfig: UiCompositionConfig) =
     Component(Props(composition, quality, compositionConfig))
 }

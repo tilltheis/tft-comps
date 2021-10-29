@@ -2,11 +2,11 @@ package tftcomps.application
 
 import japgolly.scalajs.react.{React, ScalaFnComponent}
 import japgolly.scalajs.react.vdom.html_<^._
-import tftcomps.domain.{Composition, CompositionConfig}
+import tftcomps.domain.Composition
 
 object CompositionResults {
 
-  final case class Props(compositions: Seq[Composition], searchResultCount: Int, compositionConfig: CompositionConfig)
+  final case class Props(compositions: Seq[Composition], searchResultCount: Int, compositionConfig: UiCompositionConfig)
 
   val Component = ScalaFnComponent[Props] { props =>
     if (props.compositions.isEmpty)
@@ -49,6 +49,6 @@ object CompositionResults {
     }
   }
 
-  def apply(compositions: Seq[Composition], searchResultCount: Int, compositionConfig: CompositionConfig) =
+  def apply(compositions: Seq[Composition], searchResultCount: Int, compositionConfig: UiCompositionConfig) =
     Component(Props(compositions, searchResultCount, compositionConfig))
 }

@@ -3,67 +3,77 @@ package tftcomps.application
 import japgolly.scalajs.react.component.Scala.{BackendScope, Unmounted}
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, CallbackTo, ScalaComponent}
+
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalajs.dom.raw.{MessageEvent, Worker}
 import tftcomps.domain.{Composition, CompositionConfig, data}
 
 object CompositionGenerator {
-  final case class State(compositionConfig: CompositionConfig,
+  final case class State(compositionConfig: UiCompositionConfig,
                          compositions: Seq[Composition],
                          searchResultCount: Int,
-                         workers: Seq[Worker])
+                         workers: Seq[SearchWorker])
   object State {
     val empty: State = State(
-      CompositionConfig(maxTeamSize = 8,
-                        maxChampionCost = 5,
-                        requiredRoles = data.CurrentSet.roles.all.map(_ -> 0).toMap,
-                        requiredChampions = Set.empty,
-                        searchThoroughness = 2),
+      UiCompositionConfig(maxTeamSize = 8,
+                          maxChampionCost = 5,
+                          requiredRoles = data.CurrentSet.roles.all.map(_ -> 0).toMap,
+                          requiredChampions = Set.empty),
       Seq.empty,
       0,
       Seq.empty
     )
   }
 
+  class SearchWorker(remainingTaskCount: AtomicInteger, compositionConfig: CompositionConfig)(
+      handleMessage: Option[Composition] => Callback) {
+    import io.circe.parser._
+    import io.circe.syntax._
+    import tftcomps.domain.codec._
+
+    private val worker = new Worker("../../../../webworker/target/scala-2.13/tft-comps-webworker-fastopt.js")
+    worker.onmessage = { (event: MessageEvent) =>
+      // give the computer time to breath
+      scalajs.js.timers.setTimeout(0)(triggerSingleSearch())
+      val maybeComposition = decode[Option[Composition]](event.data.asInstanceOf[String]).toTry.get
+      handleMessage(maybeComposition).runNow()
+    }
+
+    private def triggerSingleSearch(): Unit = {
+      if (remainingTaskCount.decrementAndGet() >= 0) {
+        worker.postMessage(compositionConfig.asJson.noSpaces)
+      }
+    }
+
+    def start(): Unit = triggerSingleSearch()
+    def stop(): Unit = worker.terminate()
+  }
+
   final case class Backend($ : BackendScope[Unit, State]) {
-    def handleCompositionConfigChange(newCompositionConfig: CompositionConfig): Callback = {
-      import io.circe.parser._
-      import io.circe.syntax._
-      import tftcomps.domain.codec._
+    def handleCompositionConfigChange(newCompositionConfig: UiCompositionConfig): Callback = {
+      val remainingTaskCount = new AtomicInteger(150)
 
-      val batchSize = 10
-      val remainingTaskCount = new AtomicInteger(150 - batchSize)
-
-      val terminateWorkers = $.state.map(_.workers.foreach(_.terminate()))
+      val terminateWorkers = $.state.map(_.workers.foreach(_.stop()))
       val spawnWorkers = CallbackTo {
-        (0 until batchSize).map { i =>
-          // fastest worker will produce most results but that's ok
-          val thoroughnessOverride = Seq(0, 1, 2, 3, 4)(i % 5)
-          val worker = new Worker("../../../../webworker/target/scala-2.13/tft-comps-webworker-fastopt.js")
-          worker.onmessage = { (event: MessageEvent) =>
-            if (remainingTaskCount.decrementAndGet() >= 0) {
-              // give the computer time to breath
-              scalajs.js.timers.setTimeout(0) {
-                worker.postMessage(newCompositionConfig.copy(searchThoroughness = thoroughnessOverride).asJson.noSpaces)
+        // fastest worker will produce most results but that's ok
+        (0 to newCompositionConfig.maxTeamSize).filter(_ < 7).map { thoroughness =>
+          val worker = new SearchWorker(remainingTaskCount, newCompositionConfig.toCompositionConfig(thoroughness))(
+            (maybeComposition: Option[Composition]) => {
+              $.modState { state =>
+                val newCompositions = maybeComposition.fold(state.compositions)(state.compositions :+ _)
+                state.copy(
+                  compositions =
+                    newCompositions.distinct.sortBy(c => (-c.synergyPercentage, -c.champions.map(_.cost).sum)).take(50),
+                  searchResultCount = state.searchResultCount + 1
+                )
               }
-            }
-            val maybeComposition = decode[Option[Composition]](event.data.asInstanceOf[String]).toTry.get
-            $.modState { state =>
-              val newCompositions = maybeComposition.fold(state.compositions)(state.compositions :+ _)
-              state.copy(
-                compositions =
-                  newCompositions.distinct.sortBy(c => (-c.synergyPercentage, -c.champions.map(_.cost).sum)).take(50),
-                searchResultCount = state.searchResultCount + 1
-              )
-            }.runNow()
-          }
+            })
           worker
         }
       }
-      def setNewState(workers: Seq[Worker]) =
+      def setNewState(workers: Seq[SearchWorker]) =
         $.setState(State.empty.copy(compositionConfig = newCompositionConfig, workers = workers))
-      def startWorkers(workers: Seq[Worker]) =
-        Callback(workers.foreach(_.postMessage(newCompositionConfig.asJson.noSpaces)))
+      def startWorkers(workers: Seq[SearchWorker]) = Callback(workers.foreach(_.start()))
       terminateWorkers >> (spawnWorkers >>= (w => setNewState(w) >> startWorkers(w)))
     }
 

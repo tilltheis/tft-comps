@@ -2,10 +2,11 @@ package tftcomps.application
 
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, ReactEventFromInput, ScalaFnComponent}
-import tftcomps.domain.{Champion, CompositionConfig, Role}
+import tftcomps.domain.{Champion, Role}
 
 object CompositionForm {
-  final case class Props(compositionConfig: CompositionConfig, onCompositionConfigChange: CompositionConfig => Callback)
+  final case class Props(compositionConfig: UiCompositionConfig,
+                         onCompositionConfigChange: UiCompositionConfig => Callback)
 
   val Component = ScalaFnComponent[Props] { props =>
     def numberSlider(title: String,
@@ -102,22 +103,10 @@ object CompositionForm {
       requiredChampionsField("Required Champions",
                              tftcomps.domain.data.CurrentSet.champions.all,
                              props.compositionConfig.requiredChampions)(x =>
-        props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x))),
-      numberSlider(
-        "Search thoroughness",
-        0 to 10,
-        props.compositionConfig.searchThoroughness,
-        Some(
-          <.i(
-            "Increasing this ",
-            <.i("might"),
-            " result in finding results where none could be found before. ",
-            "Usually, it just leads to slower searches with even fewer (but good) results."
-          ))
-      )(x => props.onCompositionConfigChange(props.compositionConfig.copy(searchThoroughness = x)))
+        props.onCompositionConfigChange(props.compositionConfig.copy(requiredChampions = x)))
     )
   }
 
-  def apply(compositionConfig: CompositionConfig, onCompositionSettingsChange: CompositionConfig => Callback) =
+  def apply(compositionConfig: UiCompositionConfig, onCompositionSettingsChange: UiCompositionConfig => Callback) =
     Component(Props(compositionConfig, onCompositionSettingsChange))
 }
