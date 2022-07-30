@@ -44,10 +44,10 @@ Checkout the `gh-pages` branch.
 
 ```shell script
 cp -r application/target/scala-2.13/scalajs-bundler/main/tft-comps-application-opt-bundle.js \
-  application/target/web/sass/main/{champions.png,favicon.png,styles.css,traits.svg} \
+  application/target/web/sass/main/{champions.png,favicon.png,styles.css,traits.png} \
   webworker/target/scala-2.13/tft-comps-webworker-opt.js \
   .
-git add champions.png favicon.png styles.css traits.svg tft-comps-application-opt-bundle.js tft-comps-webworker-opt.js
+git add champions.png favicon.png styles.css traits.png tft-comps-application-opt-bundle.js tft-comps-webworker-opt.js
 ```
 
 Check result at http://localhost:8000/.
