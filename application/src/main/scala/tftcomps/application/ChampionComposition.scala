@@ -3,6 +3,7 @@ package tftcomps.application
 import japgolly.scalajs.react.ScalaFnComponent
 import japgolly.scalajs.react.vdom.Attr
 import japgolly.scalajs.react.vdom.html_<^._
+import tftcomps.application.ChampionComposition.Color
 import tftcomps.domain.{Composition, Role}
 
 object ChampionComposition {
@@ -24,32 +25,34 @@ object ChampionComposition {
     // generate this from the official data (https://developer.riotgames.com/docs/tft#static-data_current-set) using
     // jq -r '.[] | "case \(.name) => go(\(.sets | map("\(.min) -> \(.style[0:1] | ascii_upcase)\(.style[1:])") | join(", ")))"' traits.json
     role match {
-      case Abomination  => go(3 -> Silver, 4 -> Gold, 5 -> Chromatic)
-      case Assassin     => go(2 -> Bronze, 4 -> Silver, 6 -> Gold)
-      case Brawler      => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case Caretaker    => go(1 -> Gold)
-      case Cavalier     => go(2 -> Bronze, 3 -> Silver, 4 -> Gold)
-      case Cannoneer    => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case Cruel        => go(1 -> Gold)
-      case Dawnbringer  => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
-      case Draconic     => go(3 -> Bronze, 5 -> Gold)
-      case Forgotten    => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
-      case Hellion      => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
-      case Inanimate    => go(1 -> Gold)
-      case Invoker      => go(2 -> Bronze, 4 -> Gold)
-      case Ironclad     => go(2 -> Bronze, 3 -> Gold, 4 -> Chromatic)
-      case Knight       => go(2 -> Bronze, 4 -> Silver, 6 -> Gold)
-      case Legionnaire  => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
+      case Assassin     => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Astral       => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
+      case Bard         => go(1 -> Gold)
+      case Bruiser      => go(2 -> Bronze, 4 -> Silver, 8 -> Gold)
+      case Cannoneer    => go(2 -> Bronze, 3 -> Silver, 4 -> Gold, 5 -> Chromatic)
+      case Cavalier     => go(2 -> Bronze, 3 -> Silver, 4 -> Gold, 5 -> Chromatic)
+      case Dragon       => go(1 -> Gold)
+      case Dragonmancer => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
+      case Evoker       => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Guardian     => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Guild        => go(1 -> Bronze, 3 -> Silver, 5 -> Gold, 6 -> Chromatic)
+      case Jade         => go(3 -> Bronze, 6 -> Silver, 9 -> Gold, 12 -> Chromatic)
+      case Legend       => go(3 -> Gold)
+      case Mage         => go(3 -> Bronze, 5 -> Silver, 7 -> Gold, 9 -> Chromatic)
+      case Mirage       => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
       case Mystic       => go(2 -> Bronze, 3 -> Silver, 4 -> Gold, 5 -> Chromatic)
-      case Nightbringer => go(2 -> Bronze, 4 -> Silver, 6 -> Silver, 8 -> Gold)
-      case Ranger       => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case Redeemed     => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
-      case Renewer      => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case Revenant     => go(2 -> Bronze, 3 -> Silver, 4 -> Gold, 5 -> Chromatic)
-      case Sentinel     => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
-      case Skirmisher   => go(3 -> Bronze, 6 -> Gold, 9 -> Chromatic)
-      case Spellweaver  => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
-      case Victorious   => go(1 -> Gold)
+      case Ragewing     => go(3 -> Bronze, 6 -> Silver, 9 -> Gold)
+      case Revel        => go(2 -> Bronze, 3 -> Silver, 4 -> Gold, 5 -> Chromatic)
+      case Scalescorn   => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Shapeshifter => go(2 -> Bronze, 4 -> Silver, 6 -> Gold)
+      case Shimmerscale => go(3 -> Bronze, 5 -> Silver, 7 -> Gold, 9 -> Chromatic)
+      case SpellThief   => go(1 -> Gold)
+      case Starcaller   => go(1 -> Gold)
+      case Swiftshot    => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Tempest      => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
+      case Trainer      => go(2 -> Bronze, 3 -> Gold)
+      case Warrior      => go(2 -> Bronze, 4 -> Gold, 6 -> Chromatic)
+      case Whispers     => go(2 -> Bronze, 4 -> Silver, 6 -> Gold, 8 -> Chromatic)
       case _            => None
     }
   }

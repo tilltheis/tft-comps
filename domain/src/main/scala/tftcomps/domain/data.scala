@@ -5,6 +5,197 @@ object data {
   // jq -r '.[] | "val \(.name): Role = Role(\"\(.name)\", Set(\(.sets | map(.min) | join(", "))))"' traits.json
   // jq -r '.[] | "val \(.name | gsub("[^a-z]"; ""; "i")): Champion = Champion(\"\(.name)\", Set(\(.traits | select(length > 0) | map(. | sub("^Set5_"; "")) | join(", "))), \(.cost))"' champions.json
 
+  object set7 {
+
+    object roles {
+      val Assassin: Role = Role("Assassin", Set(2, 4, 6))
+      val Astral: Role = Role("Astral", Set(3, 6, 9))
+      val Bard: Role = Role("Bard", Set(1))
+      val Bruiser: Role = Role("Bruiser", Set(2, 4, 6, 8))
+      val Cannoneer: Role = Role("Cannoneer", Set(2, 3, 4, 5))
+      val Cavalier: Role = Role("Cavalier", Set(2, 3, 4, 5))
+      val Dragon: Role = Role("Dragon", Set(1))
+      val Dragonmancer: Role = Role("Dragonmancer", Set(3, 6, 9))
+      val Evoker: Role = Role("Evoker", Set(2, 4, 6))
+      val Guardian: Role = Role("Guardian", Set(2, 4, 6))
+      val Guild: Role = Role("Guild", Set(1, 2, 3, 4, 5, 6))
+      val Jade: Role = Role("Jade", Set(12, 3, 6, 9))
+      val Legend: Role = Role("Legend", Set(3))
+      val Mage: Role = Role("Mage", Set(3, 5, 7, 9))
+      val Mirage: Role = Role("Mirage", Set(2, 4, 6, 8))
+      val Mystic: Role = Role("Mystic", Set(2, 3, 4, 5))
+      val Ragewing: Role = Role("Ragewing", Set(3, 6, 9))
+      val Revel: Role = Role("Revel", Set(2, 3, 4, 5))
+      val Scalescorn: Role = Role("Scalescorn", Set(2, 4, 6))
+      val Shapeshifter: Role = Role("Shapeshifter", Set(2, 4, 6))
+      val Shimmerscale: Role = Role("Shimmerscale", Set(3, 5, 7, 9))
+      val SpellThief: Role = Role("Spell-Thief", Set(1))
+      val Starcaller: Role = Role("Starcaller", Set(1))
+      val Swiftshot: Role = Role("Swiftshot", Set(2, 4, 6))
+      val Tempest: Role = Role("Tempest", Set(2, 4, 6, 8))
+      val Trainer: Role = Role("Trainer", Set(2, 3))
+      val Warrior: Role = Role("Warrior", Set(2, 4, 6))
+      val Whispers: Role = Role("Whispers", Set(2, 4, 6, 8))
+
+      val all: Set[Role] = Set(
+        Assassin,
+        Astral,
+        Bard,
+        Bruiser,
+        Cannoneer,
+        Cavalier,
+        Dragon,
+        Dragonmancer,
+        Evoker,
+        Guardian,
+        Guild,
+        Jade,
+        Legend,
+        Mage,
+        Mirage,
+        Mystic,
+        Ragewing,
+        Revel,
+        Scalescorn,
+        Shapeshifter,
+        Shimmerscale,
+        SpellThief,
+        Starcaller,
+        Swiftshot,
+        Tempest,
+        Trainer,
+        Warrior,
+        Whispers
+      )
+    }
+
+    object champions {
+
+      import roles._
+
+      val Aatrox: Champion = Champion("Aatrox", Set(Shimmerscale, Warrior), 1)
+      val Anivia: Champion = Champion("Anivia", Set(Evoker, Jade, Legend), 3)
+      val AoShin: Champion = Champion("Ao Shin", Set(Dragon, Tempest), 10)
+      val Ashe: Champion = Champion("Ashe", Set(Dragonmancer, Jade, Swiftshot), 2)
+      val AurelionSol: Champion = Champion("Aurelion Sol", Set(Astral, Dragon, Evoker), 10)
+      val Bard: Champion = Champion("Bard", Set(roles.Bard, Guild, Mystic), 5)
+      val Braum: Champion = Champion("Braum", Set(Guardian, Scalescorn), 2)
+      val Corki: Champion = Champion("Corki", Set(Cannoneer, Revel), 4)
+      val Daeja: Champion = Champion("Daeja", Set(Dragon, Mirage), 8)
+      val Diana: Champion = Champion("Diana", Set(Assassin, Scalescorn), 3)
+      val Elise: Champion = Champion("Elise", Set(Shapeshifter, Whispers), 3)
+      val Ezreal: Champion = Champion("Ezreal", Set(Swiftshot, Tempest), 1)
+      val Gnar: Champion = Champion("Gnar", Set(Jade, Shapeshifter), 2)
+      val Hecarim: Champion = Champion("Hecarim", Set(Cavalier, Ragewing), 4)
+      val Heimerdinger: Champion = Champion("Heimerdinger", Set(Mage, Trainer), 1)
+      val Idas: Champion = Champion("Idas", Set(Dragon, Guardian, Shimmerscale), 8)
+      val Illaoi: Champion = Champion("Illaoi", Set(Astral, Bruiser), 3)
+      val Jinx: Champion = Champion("Jinx", Set(Cannoneer, Revel), 2)
+      val Karma: Champion = Champion("Karma", Set(Dragonmancer, Jade), 1)
+      val Kayn: Champion = Champion("Kayn", Set(Assassin, Ragewing), 2)
+      val LeeSin: Champion = Champion("Lee Sin", Set(Dragonmancer, Tempest), 3)
+      val Leona: Champion = Champion("Leona", Set(Guardian, Mirage), 1)
+      val Lillia: Champion = Champion("Lillia", Set(Cavalier, Mage, Scalescorn), 2)
+      val Lulu: Champion = Champion("Lulu", Set(Evoker, Mystic, Trainer), 3)
+      val Nami: Champion = Champion("Nami", Set(Astral, Mage, Mystic), 2)
+      val Neeko: Champion = Champion("Neeko", Set(Jade, Shapeshifter), 4)
+      val Nidalee: Champion = Champion("Nidalee", Set(Astral, Shapeshifter), 1)
+      val Nunu: Champion = Champion("Nunu", Set(Cavalier, Mirage), 3)
+      val Olaf: Champion = Champion("Olaf", Set(Bruiser, Scalescorn, Warrior), 3)
+      val Ornn: Champion = Champion("Ornn", Set(Bruiser, Legend, Tempest), 4)
+      val Pyke: Champion = Champion("Pyke", Set(Assassin, Whispers), 5)
+      val Qiyana: Champion = Champion("Qiyana", Set(Assassin, Tempest), 2)
+      val Ryze: Champion = Champion("Ryze", Set(Guild, Mage), 3)
+      val Sejuani: Champion = Champion("Sejuani", Set(Cavalier, Guild), 1)
+      val Senna: Champion = Champion("Senna", Set(Cannoneer, Ragewing), 1)
+      val Sett: Champion = Champion("Sett", Set(Dragonmancer, Ragewing), 1)
+      val Shen: Champion = Champion("Shen", Set(Bruiser, Ragewing, Warrior), 2)
+      val ShiOhYu: Champion = Champion("Shi Oh Yu", Set(Dragon, Jade, Mystic), 8)
+      val Shyvana: Champion = Champion("Shyvana", Set(Dragon, Ragewing, Shapeshifter), 10)
+      val Skarner: Champion = Champion("Skarner", Set(Astral, Bruiser), 1)
+      val Sona: Champion = Champion("Sona", Set(Evoker, Revel), 4)
+      val Soraka: Champion = Champion("Soraka", Set(Jade, Starcaller), 5)
+      val Swain: Champion = Champion("Swain", Set(Dragonmancer, Ragewing, Shapeshifter), 3)
+      val Syfen: Champion = Champion("Syfen", Set(Bruiser, Dragon, Whispers), 8)
+      val Sylas: Champion = Champion("Sylas", Set(Bruiser, Mage, Whispers), 3)
+      val TahmKench: Champion = Champion("Tahm Kench", Set(Bruiser, Revel), 1)
+      val Talon: Champion = Champion("Talon", Set(Assassin, Guild), 4)
+      val Taric: Champion = Champion("Taric", Set(Guardian, Jade), 1)
+      val Thresh: Champion = Champion("Thresh", Set(Guardian, Whispers), 2)
+      val Tristana: Champion = Champion("Tristana", Set(Cannoneer, Trainer), 2)
+      val Twitch: Champion = Champion("Twitch", Set(Guild, Swiftshot), 2)
+      val Varus: Champion = Champion("Varus", Set(Astral, Swiftshot), 3)
+      val Vladimir: Champion = Champion("Vladimir", Set(Astral, Mage), 1)
+      val Volibear: Champion = Champion("Volibear", Set(Dragonmancer, Legend, Shimmerscale), 3)
+      val Xayah: Champion = Champion("Xayah", Set(Ragewing, Swiftshot), 4)
+      val Yasuo: Champion = Champion("Yasuo", Set(Dragonmancer, Mirage, Warrior), 5)
+      val Yone: Champion = Champion("Yone", Set(Mirage, Warrior), 2)
+      val Zoe: Champion = Champion("Zoe", Set(Mage, Shimmerscale, SpellThief), 5)
+
+      val all: Set[Champion] = Set(
+        Aatrox,
+        Anivia,
+        AoShin,
+        Ashe,
+        AurelionSol,
+        Bard,
+        Braum,
+        Corki,
+        Daeja,
+        Diana,
+        Elise,
+        Ezreal,
+        Gnar,
+        Hecarim,
+        Heimerdinger,
+        Idas,
+        Illaoi,
+        Jinx,
+        Karma,
+        Kayn,
+        LeeSin,
+        Leona,
+        Lillia,
+        Lulu,
+        Nami,
+        Neeko,
+        Nidalee,
+        Nunu,
+        Olaf,
+        Ornn,
+        Pyke,
+        Qiyana,
+        Ryze,
+        Sejuani,
+        Senna,
+        Sett,
+        Shen,
+        ShiOhYu,
+        Shyvana,
+        Skarner,
+        Sona,
+        Soraka,
+        Swain,
+        Syfen,
+        Sylas,
+        TahmKench,
+        Talon,
+        Taric,
+        Thresh,
+        Tristana,
+        Twitch,
+        Varus,
+        Vladimir,
+        Volibear,
+        Xayah,
+        Yasuo,
+        Yone,
+        Zoe
+      )
+    }
+
+  }
+
   object set5_5 {
 
     object roles {
@@ -537,6 +728,6 @@ object data {
     }
   }
 
-  val CurrentSet: set5_5.type = set5_5
+  val CurrentSet: set7.type = set7
 
 }
