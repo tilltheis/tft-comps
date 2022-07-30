@@ -36,8 +36,8 @@ $chromatic: conic-gradient(
 );
 $colors: ("dirt": $dirt, "bronze": $bronze, "silver": $silver, "gold": $gold, "chromatic": $chromatic);
 
-$roles: abomination assassin brawler cannoneer caretaker cavalier cruel dawnbringer draconic forgotten hellion inanimate invoker ironclad knight legionnaire mystic nightbringer ranger redeemed renewer revenant sentinel skirmisher spellweaver victorious;
-$champions: aatrox akshan aphelios ashe brand diana draven fiddlesticks galio garen gragas gwen hecarim heimerdinger irelia ivern jax kalista karma kayle kennen khazix kled leesin leona lucian lulu lux missfortune nautilus nidalee nocturne nunu olaf poppy pyke rakan rell riven sejuani senna sett soraka syndra teemo thresh tristana udyr varus vayne velkoz viego vladimir volibear yasuo ziggs zyra;
+$roles: assassin astral bard bruiser cannoneer cavalier dragon dragonmancer evoker guardian guild jade legend mage mirage mystic ragewing revel scalescorn shapeshifter shimmerscale spellthief starcaller swiftshot tempest trainer warrior whispers;
+$champions: aatrox anivia aoshin ashe aurelionsol bard braum corki daeja diana elise ezreal gnar hecarim heimerdinger idas illaoi jinx karma kayn leesin leona lillia lulu nami neeko nidalee nunu olaf ornn pyke qiyana ryze sejuani senna sett shen shiohyu shyvana skarner sona soraka swain syfen sylas tahmkench talon taric thresh tristana twitch varus vladimir volibear xayah yasuo yone zoe;
 
 $hexagon-mask: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 292 334" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M146.208,4.118l141.715,81.058l0,162.693l-141.715,81.347l-141.716,-81.347l0,-162.693l141.716,-81.058Z"/><path d="M146.208,4.118l141.715,81.058l0,162.693l-141.715,81.347l-141.716,-81.347l0,-162.693l141.716,-81.058Zm-0,24l120.882,69.142c-0,0 -0,138.546 -0,138.546c-0,0 -120.882,69.388 -120.882,69.388c-0,0 -120.883,-69.388 -120.883,-69.388c0,0 0,-138.546 0,-138.546l120.883,-69.142Z"/></svg>');
 @function hexagon-shape($svg-stroke-color-string) {
@@ -279,6 +279,7 @@ input[type=range] {
         content: '';
         -webkit-mask: left center / 3rem 3rem no-repeat;
         background: $darkText;
+        -webkit-mask: left center / 3rem auto url("traits.png") no-repeat;
 
         width: 3rem;
         height: 3rem;
@@ -290,9 +291,11 @@ input[type=range] {
       }
     }
 
-    @each $role in $roles {
+    @for $i from 1 through length($roles) {
+      $role: nth($roles, $i);
+
       &.#{$role} label:after {
-        -webkit-mask-image: url("traits.svg#use-#{$role}");
+        -webkit-mask-position: 0 (-3rem * ($i - 1));
       }
     }
 
@@ -469,6 +472,7 @@ input[type=range] {
       &:after {
         content: ' ';
         background: $darkText;
+        -webkit-mask: left center / 4rem auto url("traits.png") no-repeat;
 
         width: 4rem;
         height: 4rem;
@@ -479,9 +483,11 @@ input[type=range] {
         transform: translate(0, -50%) scale(0.5);
       }
 
-      @each $role in $roles {
+      @for $i from 1 through length($roles) {
+        $role: nth($roles, $i);
+
         &.#{$role}:after {
-          -webkit-mask-image: url("traits.svg#use-#{$role}");
+          -webkit-mask-position: 0 (-4rem * ($i - 1));
         }
       }
 
@@ -585,6 +591,7 @@ input[type=range] {
           &:after {
             content: ' ';
             background: $lightText;
+            -webkit-mask: left center / 4rem auto url("traits.png") no-repeat;
 
             width: 4rem;
             height: 4rem;
@@ -595,9 +602,11 @@ input[type=range] {
             transform: translate(0, -50%) scale(0.5);
           }
 
-          @each $role in $roles {
+          @for $i from 1 through length($roles) {
+            $role: nth($roles, $i);
+
             &.#{$role}:after {
-              -webkit-mask-image: url("traits.svg#use-#{$role}");
+              -webkit-mask-position: 0 (-4rem * ($i - 1));
             }
           }
         }
