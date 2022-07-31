@@ -39,16 +39,16 @@ lazy val application = project
     scalaJSUseMainModuleInitializer := true,
     webpackBundlingMode := BundlingMode.LibraryOnly(),
     libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "1.7.0",
-    npmDependencies in Compile ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1"),
-    sourceDirectory in Assets := file("application/src/main/resources"),
+    Compile / npmDependencies ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1"),
+    Assets / sourceDirectory := file("application/src/main/resources"),
     copyAssetsToTargetDirectory := {
       println("Copying CSS assets to resources...")
       val source = file("application/src/main/resources")
       val target = file("application/target/web/sass/main")
       IO.copyDirectory(source, target)
     },
-    compile in Compile := {
-      val x = (compile in Compile).value
+    Compile / compile := {
+      val x = (Compile / compile).value
       copyAssetsToTargetDirectory.value
       x
     }

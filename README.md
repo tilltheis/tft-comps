@@ -18,7 +18,7 @@ First build the app and start a web server.
 
 ```shell script
 sbt webworker/fastOptJS
-sbt application/fastOptJS::webpack
+sbt application/fastOptJS/webpack
 python3 -m http.server
 ```
 
@@ -35,7 +35,7 @@ Then build the app with full optimization settings enabled.
 ```shell script
 sbt clean
 sbt webworker/fullOptJS
-sbt application/fullOptJS::webpack
+sbt application/fullOptJS/webpack
 ```
 
 `git stash` or `git checkout .` to get rid of the uncommitted build and source file changes and be able to changes branches.
