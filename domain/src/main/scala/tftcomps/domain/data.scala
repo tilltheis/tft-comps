@@ -5,6 +5,195 @@ object data {
   // jq -r '.[] | "val \(.name): Role = Role(\"\(.name)\", Set(\(.sets | map(.min) | join(", "))))"' traits.json
   // jq -r '.[] | "val \(.name | gsub("[^a-z]"; ""; "i")): Champion = Champion(\"\(.name)\", Set(\(.traits | select(length > 0) | map(. | sub("^Set5_"; "")) | join(", "))), \(.cost))"' champions.json
 
+  object set8 {
+    object roles {
+      val Ace: Role = Role("Ace", Set(1, 4))
+      val Admin: Role = Role("A.D.M.I.N.", Set(2, 4, 6))
+      val Aegis: Role = Role("Aegis", Set(2, 3, 4, 5))
+      val AnimaSquad: Role = Role("Anima Squad", Set(3, 5, 7))
+      val Arsenal: Role = Role("Arsenal", Set(1))
+      val Brawler: Role = Role("Brawler", Set(2, 4, 6, 8))
+      val Civilian: Role = Role("Civilian", Set(1, 2, 3))
+      val Corrupted: Role = Role("Corrupted", Set(1))
+      val Defender: Role = Role("Defender", Set(2, 4, 6))
+      val Duelist: Role = Role("Duelist", Set(2, 4, 6, 8))
+      val Forecaster: Role = Role("Forecaster", Set(1))
+      val Gadgeteen: Role = Role("Gadgeteen", Set(3, 5))
+      val Hacker: Role = Role("Hacker", Set(2, 3, 4))
+      val Heart: Role = Role("Heart", Set(2, 4, 6))
+      val LaserCorps: Role = Role("LaserCorps", Set(3, 6, 9))
+      val Mascot: Role = Role("Mascot", Set(2, 4, 6, 8))
+      val MechaPrime: Role = Role("Mecha: PRIME", Set(3, 5))
+      val OxForce: Role = Role("Ox Force", Set(2, 4, 6, 8))
+      val Prankster: Role = Role("Prankster", Set(2, 3))
+      val Recon: Role = Role("Recon", Set(2, 3, 4))
+      val Renegade: Role = Role("Renegade", Set(3, 6))
+      val Spellslinger: Role = Role("Spellslinger", Set(2, 4, 6, 8))
+      val StarGuardian: Role = Role("Star Guardian", Set(3, 5, 7, 9))
+      val Supers: Role = Role("Supers", Set(3))
+      val Sureshot: Role = Role("Sureshot", Set(2, 4))
+      val Threat: Role = Role("Threat", Set(1))
+      val Underground: Role = Role("Underground", Set(3, 5))
+
+      val all: Set[Role] = Set(
+        Ace,
+        Admin,
+        Aegis,
+        AnimaSquad,
+        Arsenal,
+        Brawler,
+        Civilian,
+        Corrupted,
+        Defender,
+        Duelist,
+        Forecaster,
+        Gadgeteen,
+        Hacker,
+        Heart,
+        LaserCorps,
+        Mascot,
+        MechaPrime,
+        OxForce,
+        Prankster,
+        Recon,
+        Renegade,
+        Spellslinger,
+        StarGuardian,
+        Supers,
+        Sureshot,
+        Threat,
+        Underground
+      )
+    }
+
+    object champions {
+      import roles._
+
+      val Alistar: Champion = Champion("Alistar", Set(Aegis, Mascot, OxForce), 3)
+      val Annie: Champion = Champion("Annie", Set(Gadgeteen, OxForce, Spellslinger), 2)
+      val Aphelios: Champion = Champion("Aphelios", Set(Arsenal, OxForce, Sureshot), 5)
+      val Ashe: Champion = Champion("Ashe", Set(LaserCorps, Recon), 1)
+      val AurelionSol: Champion = Champion("Aurelion Sol", Set(Threat), 4)
+      val Belveth: Champion = Champion("Belveth", Set(Threat), 4)
+      val Blitzcrank: Champion = Champion("Blitzcrank", Set(Admin, Brawler), 1)
+      val Camille: Champion = Champion("Camille", Set(Admin, Renegade), 2)
+      val Chogath: Champion = Champion("Chogath", Set(Threat), 3)
+      val Draven: Champion = Champion("Draven", Set(Ace, MechaPrime), 2)
+      val Ekko: Champion = Champion("Ekko", Set(Aegis, Prankster, StarGuardian), 4)
+      val Ezreal: Champion = Champion("Ezreal", Set(Recon, Underground), 2)
+      val Fiddlesticks: Champion = Champion("Fiddlesticks", Set(Corrupted, Threat), 5)
+      val Fiora: Champion = Champion("Fiora", Set(Duelist, OxForce), 2)
+      val Galio: Champion = Champion("Galio", Set(Civilian, Mascot), 1)
+      val Gangplank: Champion = Champion("Gangplank", Set(Duelist, Supers), 1)
+      val Janna: Champion = Champion("Janna", Set(Civilian, Forecaster, Spellslinger), 5)
+      val Jax: Champion = Champion("Jax", Set(Brawler, MechaPrime), 3)
+      val Jinx: Champion = Champion("Jinx", Set(AnimaSquad, Prankster), 2)
+      val Kaisa: Champion = Champion("Kaisa", Set(Recon, StarGuardian), 3)
+      val Kayle: Champion = Champion("Kayle", Set(Duelist, Underground), 1)
+      val Leblanc: Champion = Champion("Leblanc", Set(Admin, Hacker, Spellslinger), 3)
+      val LeeSin: Champion = Champion("Lee Sin", Set(Brawler, Heart, Supers), 2)
+      val Leona: Champion = Champion("Leona", Set(Aegis, MechaPrime, Renegade), 5)
+      val Lulu: Champion = Champion("Lulu", Set(Gadgeteen, Heart), 1)
+      val Lux: Champion = Champion("Lux", Set(Spellslinger, StarGuardian), 1)
+      val Malphite: Champion = Champion("Malphite", Set(Mascot, Supers), 2)
+      val MissFortune: Champion = Champion("Miss Fortune", Set(Ace, AnimaSquad), 4)
+      val Mordekaiser: Champion = Champion("Mordekaiser", Set(Ace, LaserCorps), 5)
+      val Nasus: Champion = Champion("Nasus", Set(AnimaSquad, Mascot), 1)
+      val Nilah: Champion = Champion("Nilah", Set(Duelist, StarGuardian), 3)
+      val Nunu: Champion = Champion("Nunu", Set(Gadgeteen, Mascot), 5)
+      val Poppy: Champion = Champion("Poppy", Set(Defender, Gadgeteen), 1)
+      val Rammus: Champion = Champion("Rammus", Set(Threat), 3)
+      val Rell: Champion = Champion("Rell", Set(Defender, StarGuardian), 2)
+      val Renekton: Champion = Champion("Renekton", Set(Brawler, LaserCorps), 1)
+      val Riven: Champion = Champion("Riven", Set(AnimaSquad, Brawler, Defender), 3)
+      val Samira: Champion = Champion("Samira", Set(Ace, Sureshot, Underground), 4)
+      val Sejuani: Champion = Champion("Sejuani", Set(Brawler, LaserCorps), 4)
+      val Senna: Champion = Champion("Senna", Set(LaserCorps, Sureshot), 3)
+      val Sett: Champion = Champion("Sett", Set(Defender, MechaPrime), 4)
+      val Sivir: Champion = Champion("Sivir", Set(Civilian, Sureshot), 2)
+      val Sona: Champion = Champion("Sona", Set(Heart, Spellslinger, Underground), 3)
+      val Soraka: Champion = Champion("Soraka", Set(Admin, Heart), 4)
+      val Sylas: Champion = Champion("Sylas", Set(AnimaSquad, Renegade), 1)
+      val Syndra: Champion = Champion("Syndra", Set(Heart, StarGuardian), 5)
+      val Taliyah: Champion = Champion("Taliyah", Set(Spellslinger, StarGuardian), 4)
+      val Talon: Champion = Champion("Talon", Set(OxForce, Renegade), 1)
+      val Urgot: Champion = Champion("Urgot", Set(Threat), 5)
+      val Vayne: Champion = Champion("Vayne", Set(AnimaSquad, Duelist, Recon), 3)
+      val Velkoz: Champion = Champion("Velkoz", Set(Threat), 3)
+      val Vi: Champion = Champion("Vi", Set(Aegis, Brawler, Underground), 2)
+      val Viego: Champion = Champion("Viego", Set(OxForce, Renegade), 4)
+      val Wukong: Champion = Champion("Wukong", Set(Defender, MechaPrime), 1)
+      val Yasuo: Champion = Champion("Yasuo", Set(Duelist, LaserCorps), 2)
+      val Yuumi: Champion = Champion("Yuumi", Set(Heart, Mascot, StarGuardian), 2)
+      val Zac: Champion = Champion("Zac", Set(Threat), 4)
+      val Zed: Champion = Champion("Zed", Set(Duelist, Hacker, LaserCorps), 4)
+      val Zoe: Champion = Champion("Zoe", Set(Gadgeteen, Hacker, Prankster), 3)
+
+      val all: Set[Champion] = Set(
+        Alistar,
+        Annie,
+        Aphelios,
+        Ashe,
+        AurelionSol,
+        Belveth,
+        Blitzcrank,
+        Camille,
+        Chogath,
+        Draven,
+        Ekko,
+        Ezreal,
+        Fiddlesticks,
+        Fiora,
+        Galio,
+        Gangplank,
+        Janna,
+        Jax,
+        Jinx,
+        Kaisa,
+        Kayle,
+        Leblanc,
+        LeeSin,
+        Leona,
+        Lulu,
+        Lux,
+        Malphite,
+        MissFortune,
+        Mordekaiser,
+        Nasus,
+        Nilah,
+        Nunu,
+        Poppy,
+        Rammus,
+        Rell,
+        Renekton,
+        Riven,
+        Samira,
+        Sejuani,
+        Senna,
+        Sett,
+        Sivir,
+        Sona,
+        Soraka,
+        Sylas,
+        Syndra,
+        Taliyah,
+        Talon,
+        Urgot,
+        Vayne,
+        Velkoz,
+        Vi,
+        Viego,
+        Wukong,
+        Yasuo,
+        Yuumi,
+        Zac,
+        Zed,
+        Zoe
+      )
+    }
+
+  }
+
   object set7 {
 
     object roles {
@@ -728,6 +917,6 @@ object data {
     }
   }
 
-  val CurrentSet: set7.type = set7
+  val CurrentSet: set8.type = set8
 
 }
