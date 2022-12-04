@@ -12,7 +12,7 @@ lazy val commonSettings = Seq(
     "io.circe" %%% "circe-core",
     "io.circe" %%% "circe-generic",
     "io.circe" %%% "circe-parser"
-  ).map(_ % "0.13.0")
+  ).map(_ % "0.14.3")
 )
 
 lazy val domain = crossProject(JSPlatform, JVMPlatform)
