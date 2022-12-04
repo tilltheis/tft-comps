@@ -38,8 +38,8 @@ lazy val application = project
     name := "tft-comps-application",
     scalaJSUseMainModuleInitializer := true,
     webpackBundlingMode := BundlingMode.LibraryOnly(),
-    libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "1.7.0",
-    Compile / npmDependencies ++= Seq("react" -> "16.13.1", "react-dom" -> "16.13.1"),
+    libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "2.1.1",
+    Compile / npmDependencies ++= Seq("react" -> "17.0.2", "react-dom" -> "17.0.2"),
     Assets / sourceDirectory := file("application/src/main/resources"),
     copyAssetsToTargetDirectory := {
       println("Copying CSS assets to resources...")

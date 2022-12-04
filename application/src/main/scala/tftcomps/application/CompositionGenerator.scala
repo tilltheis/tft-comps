@@ -5,7 +5,8 @@ import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{Callback, CallbackTo, ScalaComponent}
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.scalajs.dom.raw.{MessageEvent, Worker}
+import org.scalajs.dom.MessageEvent
+import org.scalajs.dom.webworkers.Worker
 import tftcomps.domain.{Composition, CompositionConfig, data}
 
 object CompositionGenerator {
