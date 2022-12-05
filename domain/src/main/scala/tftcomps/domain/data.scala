@@ -32,7 +32,7 @@ object data {
       val StarGuardian: Role = Role("Star Guardian", Set(3, 5, 7, 9))
       val Supers: Role = Role("Supers", Set(3))
       val Sureshot: Role = Role("Sureshot", Set(2, 4))
-      val Threat: Role = Role("Threat", Set(1))
+      val Threat: Role = Role("Threat", Set(1), isSynergizing = false)
       val Underground: Role = Role("Underground", Set(3, 5))
 
       val all: Set[Role] = Set(

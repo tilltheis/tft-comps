@@ -69,6 +69,20 @@ class Test extends AnyWordSpec with Matchers with TypeCheckedTripleEquals with S
       }
     }
 
+    "not try to synergize on non synergizing roles" in {
+      val role1 = Role("role1", Set(4))
+      val role2 = Role("role2", Set(4))
+      val role3 = Role("role3", Set(1), isSynergizing = false)
+      val role4 = Role("role4", Set(1), isSynergizing = false)
+      val champ1 = Champion("champ1", Set(role1, role2), 1)
+      val champ2 = Champion("champ2", Set(role2, role1), 1)
+      val champ3 = Champion("champ3", Set(role3), 1)
+      val champ4 = Champion("champ4", Set(role4), 1)
+      val allChampions = Seq(champ1, champ2, champ3, champ4)
+
+      searchWithMinRoleThresholds(allChampions, 3).get.champions.flatMap(_.roles).count(!_.isSynergizing) should ===(1)
+    }
+
     "find nothing when the number of required champions is greater than the team size" in {
       val role1 = Role("role1", Set(1))
       val champ1 = Champion("champ1", Set(role1), 1)

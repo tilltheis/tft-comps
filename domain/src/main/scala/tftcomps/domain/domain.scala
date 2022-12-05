@@ -3,7 +3,7 @@ package tftcomps
 package object domain {
   val MaxRolesPerChampion = 3 // Irelia, Gankplank, MissFortune
 
-  case class Role(name: String, stackingBonusThresholds: Set[Int])
+  case class Role(name: String, stackingBonusThresholds: Set[Int], isSynergizing: Boolean = true)
 
   case class Champion(name: String, roles: Set[Role], cost: Int)
 
@@ -51,6 +51,12 @@ package object domain {
 
     private def missingRoleSlotCount(composition: Composition) =
       composition.roleCounts.collect {
+        case (role, count) if !role.isSynergizing =>
+          // There is no technically correct solution to deprioritize synergiless roles. Not synergizing effectively
+          // sets their stacking bonus threshold to 1. Using the regular logic from the case below, this function would
+          // always return 0. To work against that we just never let them reach their threshold of 1.
+          count * 10
+
         case (role, count) if role.stackingBonusThresholds.min > count =>
           (role.stackingBonusThresholds.min - count) * 10
       }.sum
