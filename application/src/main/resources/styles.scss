@@ -351,14 +351,24 @@ input[type=range] {
   .champion {
     display: block;
 
-    background: left center / 3rem auto url("champions.png") no-repeat;
+    &:before {
+      background: left center / 3rem auto url("champions.png") no-repeat;
+      content: '';
+      margin-left: -3.5rem;
+      width: 3rem;
+      height: 3rem;
+      display: block;
+      position: absolute;
+      box-shadow: inset 0px 0px 1px 1.5px #000;
+    }
+
     padding-left: 3.5rem;
     line-height: 3rem;
 
     @for $i from 1 through length($champions) {
       $champion: nth($champions, $i);
 
-      &.#{$champion} {
+      &.#{$champion}:before {
         background-position: 0 (-3rem * ($i - 1));
       }
     }
@@ -563,12 +573,21 @@ input[type=range] {
     .champion {
       display: flex;
 
-      background: 0 / 4rem url("champions.png") no-repeat;
+      &:before {
+        background: 0 / 4rem url("champions.png") no-repeat;
+        content: '';
+        width: 4rem;
+        height: 4rem;
+        display: block;
+        position: absolute;
+        box-shadow: inset 0px 0px 1px 2px #000;
+      }
+
 
       @for $i from 1 through length($champions) {
         $champion: nth($champions, $i);
 
-        &.#{$champion} {
+        &.#{$champion}:before {
           background-position-y: (-4rem * ($i - 1));
         }
       }
